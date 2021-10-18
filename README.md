@@ -13,20 +13,20 @@
 * listens on port 3000
 * consider not exposing it to the internet without some authentication in front
 
-## Running
+## Setup
 
 ```sh
-mkdir db
+npm install
+mkdir db  # this is for the music metadata
+mkdir music  # this is for the music files / collection
 npm start
 ```
 
 ## Scanning music
 
-Adds any music files in the music directory to the searchable database
+Add music files from the /music directory to the searchable database
 
-1. log into the website
-1. press h
-1. click link "/scan to control music scanning"
+1. go to /scan
 1. click "Scan" and wait.. press refresh if you're impatient,
 1. it's done with "Scan" appears again, go back, you're done.
 
@@ -47,7 +47,7 @@ Adds any music files in the music directory to the searchable database
 1. click on file name to remove a song from queue
 1. pressing the "insert" key removes the current song from queue
 
-### Misc
+### Help
 
 1. press the H key to show or hide the instructions
 
