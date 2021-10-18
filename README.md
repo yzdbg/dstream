@@ -1,5 +1,11 @@
 # dStream sirodoht fork
 
+## Differences from [DusteDdk/dstream](https://github.com/DusteDdk/dstream)
+
+* docker free
+
+## Features
+
 * simple access to your music collection from the web browser
 * fast fuzzy search
 * for semi-organized music collections
