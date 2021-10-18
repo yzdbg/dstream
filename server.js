@@ -9,7 +9,7 @@ const spawn = require('child_process').spawn;
 
 const sqlite3 = require('sqlite3');
 
-const db = new sqlite3.Database('/db/metadata.sqlite');
+const db = new sqlite3.Database('db/metadata.sqlite');
 
 db.serialize( ()=>{
     db.run('CREATE TABLE IF NOT EXISTS track (id INTEGER PRIMARY KEY AUTOINCREMENT, file TEXT UNIQUE, artist INTEGER, album INTEGER, title TEXT, genre TEXT, lossless INTEGER, codec TEXT, bitrate INTEGER, duration REAL, track INTEGER, disk INTEGER, year INTEGER)');
@@ -22,8 +22,8 @@ db.serialize( ()=>{
     db.run('INSERT OR IGNORE INTO album (name) VALUES("-")');
 });
 
-app.use('/music/', express.static('/music'));
-app.use('/', express.static('/src/html/'));
+app.use('/music/', express.static('music'));
+app.use('/', express.static('html/'));
 
 
 app.use('/random.json', (req, res)=>{

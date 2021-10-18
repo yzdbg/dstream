@@ -3,7 +3,7 @@
 const fs = require('fs');
 const mm = require('music-metadata');
 const sqlite3 = require('sqlite3');
-const db = new sqlite3.Database('/db/metadata.sqlite');
+const db = new sqlite3.Database('db/metadata.sqlite');
 
 function getArtistId(artist) {
     if(!artist) {
@@ -144,7 +144,7 @@ function addFromArr(idx, done) {
 
 console.log('Scan music dir...');
 const started = new Date().getTime();
-scan('/music');
+scan('music');
 const ended = new Date().getTime();
 const seconds = ((ended-started)/1000).toFixed(3);
 console.log(`Scanned ${files} files in ${dirs} dirs in ${seconds} seconds.`);
@@ -191,5 +191,3 @@ function allDone() {
     db.close();
     console.log('Db closed, done.');
 }
-
-
