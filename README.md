@@ -1,64 +1,56 @@
-dStream.. DusteDs streamer
-====
-![](https://github.com/DusteDdk/dstream/blob/master/screen.gif)
-- Simple access to your music collection from the web browser
-- Fast fuzzy search
-- For semi-organized music collections
-- Low resource usage, sqlite database
-- single active process (node)
-- totally a halfhearted hack, except for this markup file that I did spend a lot of time making
+# dStream sirodoht fork
 
-Infrastructure
-====
-- Music collection available on the server
-- Docker
-- Front-end, like nginx for handling HTTPS and authentication, it listens on port 3000
-- Don't expose it to the Internet without some authentication in front, unless you want to share your collection with the world
+* simple access to your music collection from the web browser
+* fast fuzzy search
+* for semi-organized music collections
+* sqlite database
+* single active process (node)
+* halfhearted hack
 
-Running
-====
-I assume you know how to use docker, edit parameters/ports/paths/IDs as needed.
+## Infrastructure
 
-docker run --restart=always -d -v /your/music:/music:ro -v /permanent/database/:/db:rw -e USER_ID=9000 -e GROUP_ID=9000 dusted/dstream:latest
+* music collection available on the server
+* listens on port 3000
+* consider not exposing it to the internet without some authentication in front
 
-The /db mount is optional, without it, the music database is lost if the container is removed.
-The USER_ID and GROUP_ID variables are optional, if not provided, the default of 1000 is used.
+## Running
 
-Scanning music
-====
+```sh
+mkdir db
+npm start
+```
+
+## Scanning music
+
 Adds any music files in the music directory to the searchable database
-1. Log into the website
-2. press h
-3. Click link "/scan to control music scanning"
-4. Click "Scan" and wait.. press refresh if you're impatient,
-5. It's done with "Scan" appears again, go back, you're done.
 
-Using
-====
-Press J or click text-box
-search
-press enter to play top result or add from results
+1. log into the website
+1. press h
+1. click link "/scan to control music scanning"
+1. click "Scan" and wait.. press refresh if you're impatient,
+1. it's done with "Scan" appears again, go back, you're done.
 
-Add track to queue
-----
-Press song-name / file name to add to queue
-Click row left of it to autoplay from there if song is last in queue.
-Click row right of it to remove currently playing song and play this instead.
+## Using
 
-Remove track from queue
-----
-Click on file name to remove a song from queue
-Pressing the "insert" key removes the current song from queue
+1. press J or click text-box
+1. search
+1. press enter to play top result or add from results
 
-Misc
-----
-Press the H key to show or hide the instructions
+### Add track to queue
 
-Why?
-====
-This bespoke interface was hacked to do just what I want, how I want,
-maybe it won't fit you, but it fits me perfectly.
+1. press song-name / file name to add to queue
+1. click row left of it to autoplay from there if song is last in queue.
+1. click row right of it to remove currently playing song and play this instead.
 
-Source?
-====
-https://github.com/DusteDdk/dstream
+### Remove track from queue
+
+1. click on file name to remove a song from queue
+1. pressing the "insert" key removes the current song from queue
+
+### Misc
+
+1. press the H key to show or hide the instructions
+
+## License
+
+MIT
