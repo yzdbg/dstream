@@ -1,0 +1,18 @@
+{
+  "name": "dstream-sirodoht",
+  "version": "1.0.0",
+  "description": "sirodoht fork of github.com/DusteDdk/dstream",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "body-parser": "1.19.0",
+    "compression": "1.7.4",
+    "express": "4.17.1",
+    "music-metadata": "7.11.4",
+    "sqlite3": "4.2.0"
+  }
+}
