@@ -20,6 +20,10 @@ function loadList(query, random, offset) {
     });
 }
 
+function getClass(idx) {
+  return idx % 2 === 0 ? "a" : "b";
+}
+
 let pl;
 async function setList(random, offset) {
   const list = await loadList(
@@ -75,7 +79,7 @@ async function setList(random, offset) {
     )}:${("" + Math.round(track.duration % 60)).padStart(2, "0")}`;
     const fn = track.file.replaceAll("'", "\\'").replaceAll('#','%23');
     html +=
-      `<tr id=${idx}>` +
+      `<tr class="${getClass(idx)}" id=${idx}>` +
       `<td>${track.codec.split(" ")[0]}</td>` +
       `<td>${track.albumName}</td>` +
       `<td onclick="playFrom('${fn}', ${idx});" class="c">${track.artistName}</td>` +
@@ -180,6 +184,8 @@ function play(file) {
   pl.forEach((e, idx) => {
     if (e.file === file) {
       document.getElementById(idx).className = "p";
+    } else {
+      document.getElementById(idx).className = getClass(idx);
     }
   });
 }
