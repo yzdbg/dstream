@@ -20,10 +20,6 @@ function loadList(query, random, offset) {
     });
 }
 
-function getClass(idx) {
-  return idx % 2 === 0 ? "a" : "b";
-}
-
 let pl;
 async function setList(random, offset) {
   const list = await loadList(
@@ -70,7 +66,8 @@ async function setList(random, offset) {
   }
 
   let html =
-    '<table border=1 style="border: 1px solid black; border-collapse:collapse; width:100%">';
+    "<table border=1  " +
+    'style="border: 1px solid black; border-collapse:collapse; width:100%">';
   pl.forEach((track, idx) => {
     const duration = `${("" + Math.floor(track.duration / 60)).padStart(
       2,
@@ -78,31 +75,16 @@ async function setList(random, offset) {
     )}:${("" + Math.round(track.duration % 60)).padStart(2, "0")}`;
     const fn = track.file.replaceAll("'", "\\'");
     html +=
-      '<tr class="' +
-      getClass(idx) +
-      '" id=' +
-      idx +
-      "><td>" +
-      track.codec.split(" ")[0] +
-      "</td><td>" +
-      track.albumName +
-      "</td><td onclick=\"playFrom('" +
-      fn +
-      "'," +
-      idx +
-      ');">' +
-      track.artistName +
-      "</td><td onclick=\"add('" +
-      fn +
-      "');\">" +
-      (track.title !== "Untitled" ? track.title : track.file) +
-      "</td><td onclick=\"playNow('" +
-      fn +
-      "');\">" +
-      duration +
-      "</td><td>" +
-      track.year +
-      "</td></tr>";
+      `<tr id='${idx}>` +
+      `<td>${track.codec.split(" ")[0]}</td>` +
+      `<td>${track.albumName}</td>` +
+      `<td onclick="playFrom('${fn}', ${idx});">${track.artistName}</td>` +
+      `<td onclick="add('${fn}');">${
+        track.title !== "Untitled" ? track.title : track.file
+      }</td>` +
+      `<td onclick="playNow('${fn}');">${duration}</td>` +
+      `<td>${track.year}</td>` +
+      "</tr>";
   });
 
   html += "</table>";
@@ -198,8 +180,6 @@ function play(file) {
   pl.forEach((e, idx) => {
     if (e.file === file) {
       document.getElementById(idx).className = "p";
-    } else {
-      document.getElementById(idx).className = getClass(idx);
     }
   });
 }
