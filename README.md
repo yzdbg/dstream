@@ -37,6 +37,11 @@ npm start
 cp dstream.service /etc/systemd/system/
 ```
 
+## Environment
+
+For loading environment variables for development
+[direnv](https://github.com/direnv/direnv) is used.
+
 ## Scanning music
 
 Add music files from the /music directory to the searchable database
