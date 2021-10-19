@@ -12,6 +12,7 @@
 * sqlite database
 * single active process (node)
 * halfhearted hack
+* pure vanilla js with old-school innerHTML mangling
 
 ## Infrastructure
 
