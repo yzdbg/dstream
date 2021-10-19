@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "description": "sirodoht fork of github.com/DusteDdk/dstream",
   "main": "server.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sirodoht/dstream.git"
+  },
   "scripts": {
     "start": "node server.js",
     "format": "npx prettier --write .",
