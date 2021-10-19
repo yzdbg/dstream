@@ -62,7 +62,7 @@ app.use("/tracks.json", (req, res) => {
   db.each(
     "SELECT track.id as id, year, duration,codec, file, title, artist.name AS artistName, album.name AS albumName FROM track INNER JOIN artist ON artist.id=track.artist INNER JOIN album ON album.id=track.album WHERE" +
       likes +
-      " LIMIT 300",
+      " LIMIT 5000",
     qargs,
     (err, row) => {
       if (err) {
