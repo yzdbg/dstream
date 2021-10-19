@@ -14,5 +14,8 @@
     "express": "4.17.1",
     "music-metadata": "7.11.4",
     "sqlite3": "5.0.2"
+  },
+  "devDependencies": {
+    "prettier": "2.4.1"
   }
 }
