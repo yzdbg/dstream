@@ -73,7 +73,7 @@ async function setList(random, offset) {
       2,
       "0"
     )}:${("" + Math.round(track.duration % 60)).padStart(2, "0")}`;
-    const fn = track.file.replaceAll("'", "\\'");
+    const fn = track.file.replaceAll("'", "\\'").replaceAll('#','%23');
     html +=
       `<tr id=${idx}>` +
       `<td>${track.codec.split(" ")[0]}</td>` +
