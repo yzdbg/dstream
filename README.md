@@ -28,6 +28,12 @@ mkdir music  # this is for the music files / collection
 npm start
 ```
 
+## systemd
+
+```sh
+cp dstream.service /etc/systemd/system/
+```
+
 ## Scanning music
 
 Add music files from the /music directory to the searchable database

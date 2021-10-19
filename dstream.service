@@ -1,0 +1,16 @@
+[Unit]
+Description=dstream service
+After=syslog.target
+
+[Service]
+ExecStart=/usr/local/bin/node /home/srv-dstream/dstream/server.js
+WorkingDirectory=/home/srv-dstream/dstream
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=dstream
+User=srv-dstream
+Group=srv-dstream
+Environment=NODE_ENV=production
+
+[Install]
+WantedBy=multi-user.target
