@@ -208,7 +208,7 @@ function toggle() {
   if (playing) {
     playing = false;
     audio.pause();
-    document.getElementById("toggle").value = "⏵︎";
+    document.getElementById("toggle").value = "▶️";
   } else {
     playing = true;
     audio.play();
