@@ -75,7 +75,7 @@ async function setList(random, offset) {
     )}:${("" + Math.round(track.duration % 60)).padStart(2, "0")}`;
     const fn = track.file.replaceAll("'", "\\'");
     html +=
-      `<tr id='${idx}>` +
+      `<tr id=${idx}>` +
       `<td>${track.codec.split(" ")[0]}</td>` +
       `<td>${track.albumName}</td>` +
       `<td onclick="playFrom('${fn}', ${idx});">${track.artistName}</td>` +
