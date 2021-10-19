@@ -3,6 +3,7 @@
 ## Differences from [DusteDdk/dstream](https://github.com/DusteDdk/dstream)
 
 * docker free
+* prettier
 
 ## Features
 
