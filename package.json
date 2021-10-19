@@ -9,7 +9,7 @@
   },
   "scripts": {
     "start": "node server.js",
-    "format": "npx prettier --write .",
+    "format": "prettier --write .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "license": "MIT",
