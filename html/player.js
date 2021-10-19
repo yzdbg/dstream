@@ -78,11 +78,11 @@ async function setList(random, offset) {
       `<tr id=${idx}>` +
       `<td>${track.codec.split(" ")[0]}</td>` +
       `<td>${track.albumName}</td>` +
-      `<td onclick="playFrom('${fn}', ${idx});">${track.artistName}</td>` +
-      `<td onclick="add('${fn}');">${
+      `<td onclick="playFrom('${fn}', ${idx});" class="c">${track.artistName}</td>` +
+      `<td onclick="add('${fn}');" class="c">${
         track.title !== "Untitled" ? track.title : track.file
       }</td>` +
-      `<td onclick="playNow('${fn}');">${duration}</td>` +
+      `<td onclick="playNow('${fn}');" class="c">${duration}</td>` +
       `<td>${track.year}</td>` +
       "</tr>";
   });
@@ -113,7 +113,7 @@ function playNext() {
   } else if (pl.length && cpl !== -1 && cpl < pl.length) {
     play(pl[cpl].file);
     document.getElementById("status").innerHTML =
-      'Autoplay:<b onclick="stopAuto()">' +
+      'Autoplay:<b onclick="stopAuto()" class="c">' +
       pl[cpl].file +
       '</b>&nbsp;&nbsp;&nbsp;<span id="playtime"></span>';
     cpl++;
@@ -138,7 +138,7 @@ function setQueue() {
     .map(
       (e, i) =>
         (i === 0 ? "<b>" : "") +
-        '<span onclick="remove(' +
+        '<span class="c" onclick="remove(' +
         i +
         ')">' +
         e +
