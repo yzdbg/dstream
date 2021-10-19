@@ -2,3 +2,4 @@ node_modules/
 db/
 music/
 *.html
+*.md
