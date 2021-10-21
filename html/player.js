@@ -13,9 +13,10 @@ function loadList(query, random, offset) {
 
   return fetch(request)
     .then((response) => {
-      return response.blob();
+      return response.blob();reiub
     })
     .then((blob) => {
+      
       return blob.text();
     });
 }
@@ -31,6 +32,7 @@ async function setList(random, offset) {
     random,
     offset
   );
+  console.log(list)
   pl = JSON.parse(list);
 
   document.getElementById("numres").innerHTML = pl.length;

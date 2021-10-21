@@ -1,53 +1,247 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <script src="player.js"></script>
-        <style>
-            .a {
-                background-color: #fff;
-            }
 
-            .b {
-                background-color: #f2f2f2;
-            }
+<head>
+    <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@6.x/css/materialdesignicons.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+    <script src="player.js"></script>
+    <style>
+        .hud {
+            width: 100%;
+            position: fixed;
+            bottom: 0;
+        }
 
-            .c {
-                cursor: pointer;
-            }
+        .controls {
+            width: auto;
+        }
 
-            .p {
-                background-color: #adfcd2;
-            }
+        .a {
+            background-color: #fff;
+        }
 
-            tr:hover {
-                background: aliceblue;
-            }
+        .b {
+            background-color: #f2f2f2;
+        }
 
-            body {
-                background-color: #fafbff;
-                font-family: serif;
+        .c {
+            cursor: pointer;
+        }
+
+        .p {
+            background-color: #adfcd2;
+        }
+
+        tr:hover {
+            background: aliceblue;
+        }
+
+        body {
+            background-color: #fafbff;
+            font-family: serif;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <v-app>
+            <v-main>
+                <v-card class="pa-4" flat>
+                    <v-toolbar dense floating>
+                        <v-btn @click='' icon>
+                            <v-icon>mdi-magnify</v-icon>
+                        </v-btn>
+
+
+                        <v-text-field v-model="search" hide-details single-line></v-text-field>
+                        {{numberOfTracks}}
+                    </v-toolbar>
+                </v-card>
+                <input type="button" onclick="toggle();" value="▶️" id="toggle">
+                <input type="button" onclick="setList(true, 0);" value="🔀">
+                🔍<input id="search" type="text" onkeyup="setList(false, 0);"><span id="numres"></span>
+                🔊<input type="range" min=0 max=100 value=100 id="vol"
+                    onchange="audio.volume=(document.getElementById('vol').value/100)" style="width: 100px;">
+                🕑<input type="range" min=0 max=100 value=100 id="tim" style="width: 400px;" step="0.01">
+                <div id="status" style="border: 1px solid black; margin-bottom: 0.5em; margin-top: 0.5em;"></div>
+                <div id="list"></div>
+                <div id="help" style="display:none;">
+                    <ul>
+                        <li>Click song name to play / add to queue</li>
+                        <li>Click file name to remove from queue</li>
+                        <li>? = 50 random tracks</li>
+                        <li>Enter (in search box) adds first entry to queue</li>
+                        <li>Insert (in search box) skips to next song in queue</li>
+                        <li>First word gives sort priority to artist. Last word gives sort priority to title</li>
+                        <li>H toggle this help text</li>
+                        <li>J jump to search box</li>
+                        <li><a href="/scan">/scan to control music scanning</a></li>
+                        <li>Arrow left/right Jump in track</li>
+                        <li>, / . Next/Prev page</li>
+                    </ul>
+                </div>
+                <v-container>
+                    <v-card v-for="track in list" :key="track.id">
+                        {{ track.title }}
+                    </v-card>
+                </v-container>
+                <v-card dark class="hud" flat>
+                    <v-container class="controls pb-0">
+
+                        <v-row justify="center" align="center" no-gutters>
+
+                            <v-btn @click='' icon>
+                                <v-icon>mdi-shuffle-variant</v-icon>
+                            </v-btn>
+
+
+
+                            <v-btn @click='' icon>
+                                <v-icon>mdi-skip-previous</v-icon>
+                            </v-btn>
+
+
+
+                            <v-btn x-large @click='' icon>
+                                <v-icon>mdi-play-circle</v-icon>
+                            </v-btn>
+
+
+                            <v-btn @click='' icon>
+                                <v-icon>mdi-skip-next</v-icon>
+                            </v-btn>
+
+
+                            <v-btn @click='' icon>
+                                <v-icon>mdi-repeat</v-icon>
+                            </v-btn>
+                        </v-row>
+                    </v-container>
+
+                    <v-container class=" mb-3 mt-0 pt-0">
+
+                        <v-row justify="center" no-gutters>
+                            <v-col sm="1">
+                                <v-card class="text-center" elevation="0">
+                                    00:00
+                                </v-card>
+                            </v-col>
+                            <v-col sm="10">
+                                <v-card class="pt-2">
+                                    <v-progress-linear v-model="time" value="15"></v-progress-linear>
+                                </v-card>
+                            </v-col>
+                            <v-col sm="1">
+                                <v-card class="text-center" elevation="0">
+                                    03:00
+                                </v-card>
+                            </v-col>
+                        </v-row>
+                    </v-container>
+                </v-card>
+            </v-main>
+        </v-app>
+
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+    <script type="module">
+        var app = new Vue({
+            el: '#app',
+            vuetify: new Vuetify(),
+            data: {
+                search: '',
+                numberOfTracks: 0,
+                time: 0,
+                pl: null,
+                lastQuery: [],
+                random: false,
+                offset: 0,
+                list: []
+            },
+            watch: {
+                search: async function () {
+                    this.list =  await this.setList(this.search, this.random, this.offset)
+                    console.log(this.list);
+                }
+            },
+            methods: {
+                loadList: function (query, random, offset) {
+                    this.lastQuery = query.split(" ");
+
+                    let request;
+                    if (offset !== 0) {
+                        request = new Request("browse.json?p=" + offset);
+                    } else {
+                        curPage = 0;
+                        request = new Request(random ? "random.json" : "tracks.json?q=" + query);
+                    }
+
+                    return fetch(request)
+                        .then((response) => {
+                            return response.blob();
+                        })
+                        .then((blob) => {
+                            return blob.text();
+                        });
+                },
+
+                setList: async function (query, random, offset) {
+                    const l = await this.loadList(
+                        query,
+                        random,
+                        offset
+                    );
+                    pl = JSON.parse(l);
+
+                    this.numberOfTracks = pl.length;
+
+                    if (!random && lastQuery.length) {
+                        const art = lastQuery[0];
+                        const tra = lastQuery[lastQuery.length - 1];
+
+                        const rules = [
+                            { r: new RegExp("^" + art + "$", "i"), pa: 40, pt: 35 },
+                            { r: new RegExp("^" + tra + "$", "i"), pa: 35, pt: 40 },
+                            { r: new RegExp("^" + art, "i"), pa: 30, pt: 25 },
+                            { r: new RegExp("^" + tra, "i"), pa: 25, pt: 30 },
+                            { r: new RegExp(art + "$", "i"), pa: 20, pt: 15 },
+                            { r: new RegExp(tra + "$", "i"), pa: 15, pt: 20 },
+                            { r: new RegExp(art, "i"), pa: 10, pt: 5 },
+                            { r: new RegExp(tra, "i"), pa: 5, pt: 10 },
+                        ];
+
+                        if (curPage === 0 && offset === 0) {
+                            pl.forEach((e) => {
+                                e.score = 0;
+                                rules.forEach((r) => {
+                                    if (e.title && e.title.match(r.r)) {
+                                        e.score += r.pt;
+                                    }
+                                    if (e.artistName && e.artistName.match(r.r)) {
+                                        e.score += r.pa;
+                                    }
+                                    if (e.codec && e.codec === "FLAC") {
+                                        e.score += 100;
+                                    }
+                                });
+                            });
+                            pl.sort((a, b) => b.score - a.score);
+                        }
+                    }
+                    return pl
+                }
+            },
+            mounted() {
+                console.log(this.list)
             }
-        </style>
-    </head>
-    <body>
-        <input type="button" onclick="toggle();" value="." id="toggle">&nbsp;&nbsp;&nbsp;<input type="button" onclick="setList(true, 0);" value="🔀">&nbsp;&nbsp;🔍&nbsp;<input id="search" type="text" onkeyup="setList(false, 0);">&nbsp;&nbsp;&nbsp;<span id="numres"></span>
-        &nbsp;&nbsp;🔊&nbsp;<input type="range" min=0 max=100 value=100 id="vol" onchange="audio.volume=(document.getElementById('vol').value/100)" style="width: 100px;">
-        &nbsp;&nbsp;🕑&nbsp;<input type="range" min=0 max=100 value=100 id="tim" style="width: 400px;" step="0.01">
-        <div id="status" style="border: 1px solid black; margin-bottom: 0.5em; margin-top: 0.5em;"></div>
-        <div id="list"></div>
-        <div id="help" style="display:none;"><ul>
-                <li>Click song name to play / add to queue</li>
-                <li>Click file name to remove from queue</li>
-                <li>? = 50 random tracks</li>
-                <li>Enter (in search box) adds first entry to queue</li>
-                <li>Insert (in search box) skips to next song in queue</li>
-                <li>First word gives sort priority to artist. Last word gives sort priority to title</li>
-                <li>H toggle this help text</li>
-                <li>J jump to search box</li>
-                <li><a href="/scan">/scan to control music scanning</a></li>
-                <li>Arrow left/right Jump in track</li>
-                <li>, / . Next/Prev page</li>
-        </ul></div>
-    </body>
+        })
+    </script>
+</body>
+
+
 </html>
-
