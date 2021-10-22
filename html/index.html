@@ -7,7 +7,6 @@
     <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
     <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
-    <script src="player.js"></script>
     <style>
         .hud {
             width: 100%;
@@ -18,31 +17,6 @@
         .controls {
             width: auto;
         }
-
-        .a {
-            background-color: #fff;
-        }
-
-        .b {
-            background-color: #f2f2f2;
-        }
-
-        .c {
-            cursor: pointer;
-        }
-
-        .p {
-            background-color: #adfcd2;
-        }
-
-        tr:hover {
-            background: aliceblue;
-        }
-
-        body {
-            background-color: #fafbff;
-            font-family: serif;
-        }
     </style>
 </head>
 
@@ -51,17 +25,23 @@
         <v-app>
             <v-main>
                 <v-card class="pa-4" flat>
-                    <v-toolbar dense floating>
-                        <v-btn @click='' icon>
-                            <v-icon>mdi-magnify</v-icon>
-                        </v-btn>
+                    <v-app-bar>
 
+                        <v-toolbar-title>dStream</v-toolbar-title>
+                        <v-text-field @focus="toggleFocus()" @blur="toggleFocus()" v-model="search"
+                            placeholder="Where to, boss ?" class="mx-2 mx-md-4" dense hide-details solo
+                            style="max-width: 450px;">
+                            <template #prepend-inner>
+                                <v-icon :color="!isFocused ? 'grey' : undefined" class="ml-1 mr-2">
+                                    mdi-magnify
+                                </v-icon>
+                            </template>
+                        </v-text-field>
 
-                        <v-text-field v-model="search" hide-details single-line></v-text-field>
-                        {{numberOfTracks}}
-                    </v-toolbar>
+                    </v-app-bar>
+
                 </v-card>
-                <input type="button" onclick="toggle();" value="▶️" id="toggle">
+                <!-- <input type="button" onclick="toggle();" value="▶️" id="toggle">
                 <input type="button" onclick="setList(true, 0);" value="🔀">
                 🔍<input id="search" type="text" onkeyup="setList(false, 0);"><span id="numres"></span>
                 🔊<input type="range" min=0 max=100 value=100 id="vol"
@@ -83,13 +63,12 @@
                         <li>Arrow left/right Jump in track</li>
                         <li>, / . Next/Prev page</li>
                     </ul>
-                </div>
-                <v-container>
-                    <v-card v-for="track in list" :key="track.id">
-                        {{ track.title }}
-                    </v-card>
+                </div> -->
+                <v-container fluid class="ma-0 pa-3 mt-8">
+                    <v-data-table :headers="tableHeaders" :items="list" :items-per-page="10" class="elevation-1">
+                    </v-data-table>
                 </v-container>
-                <v-card dark class="hud" flat>
+                <v-card class="hud" flat>
                     <v-container class="controls pb-0">
 
                         <v-row justify="center" align="center" no-gutters>
@@ -106,8 +85,8 @@
 
 
 
-                            <v-btn x-large @click='' icon>
-                                <v-icon>mdi-play-circle</v-icon>
+                            <v-btn x-large @click='togglePlay' icon>
+                                <v-icon>{{playing ? 'mdi-pause-circle' : 'mdi-play-circle'}}</v-icon>
                             </v-btn>
 
 
@@ -152,24 +131,39 @@
     <script type="module">
         var app = new Vue({
             el: '#app',
-            vuetify: new Vuetify(),
+            vuetify: new Vuetify({
+                theme: { dark: true }
+            }),
             data: {
+                lastQuery: null,
                 search: '',
                 numberOfTracks: 0,
                 time: 0,
-                pl: null,
                 lastQuery: [],
                 random: false,
                 offset: 0,
-                list: []
+                list: [],
+                tableHeaders: [
+                    { text: 'Title', align: 'start', value: 'title' },
+                    { text: 'Album', value: 'albumName' },
+                    { text: 'Duration', value: 'duration' },
+                    { text: 'Artist', value: 'artistName' },
+                    { text: 'Year', value: 'year' },
+                    { text: 'Codec', value: 'codec' },
+                ],
+                isFocused: false,
+                playing: false,
+                audio : new Audio()
             },
-            watch: {
-                search: async function () {
-                    this.list =  await this.setList(this.search, this.random, this.offset)
-                    console.log(this.list);
-                }
-            },
+
             methods: {
+                refreshList: async function () {
+                    this.list = await this.setList(this.search, this.random, this.offset)
+                    console.log(this.list);
+                },
+                toggleFocus() {
+                    this.isFocused = !this.isFocused;
+                },
                 loadList: function (query, random, offset) {
                     this.lastQuery = query.split(" ");
 
@@ -177,7 +171,6 @@
                     if (offset !== 0) {
                         request = new Request("browse.json?p=" + offset);
                     } else {
-                        curPage = 0;
                         request = new Request(random ? "random.json" : "tracks.json?q=" + query);
                     }
 
@@ -196,13 +189,13 @@
                         random,
                         offset
                     );
-                    pl = JSON.parse(l);
+                    let pl = JSON.parse(l);
 
                     this.numberOfTracks = pl.length;
 
-                    if (!random && lastQuery.length) {
-                        const art = lastQuery[0];
-                        const tra = lastQuery[lastQuery.length - 1];
+                    if (!random && this.lastQuery.length) {
+                        const art = this.lastQuery[0];
+                        const tra = this.lastQuery[this.lastQuery.length - 1];
 
                         const rules = [
                             { r: new RegExp("^" + art + "$", "i"), pa: 40, pt: 35 },
@@ -215,8 +208,9 @@
                             { r: new RegExp(tra, "i"), pa: 5, pt: 10 },
                         ];
 
-                        if (curPage === 0 && offset === 0) {
+                        if (offset === 0) {
                             pl.forEach((e) => {
+                                e.duration = 
                                 e.score = 0;
                                 rules.forEach((r) => {
                                     if (e.title && e.title.match(r.r)) {
@@ -234,10 +228,29 @@
                         }
                     }
                     return pl
+                },
+                togglePlay() {
+                    if (this.playing) {
+                        this.playing = false;
+                        //audio.pause();
+                    } else {
+                        this.playing = true;
+                        //audio.play();
+                    }
+                },
+                stopAuto() {
+                    this.cpl = -1;
+                    document.getElementById("status").innerHTML = "";
+                    this.audio.src = "";
+                }
+            },
+            watch: {
+                search: async function(){
+                    this.refreshList()
                 }
             },
             mounted() {
-                console.log(this.list)
+                this.refreshList()
             }
         })
     </script>
