@@ -1,46 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@6.x/css/materialdesignicons.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
-    <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
-    <style>
-        .hud {
-            width: 100%;
-            position: fixed;
-            bottom: 0;
-        }
-
-        .controls {
-            width: auto;
-        }
-    </style>
-</head>
-
-<body>
-    <div id="app">
-        <v-app>
-            <v-main>
-                <v-card class="pa-4" flat>
-                    <v-app-bar>
-
-                        <v-toolbar-title>dStream</v-toolbar-title>
-                        <v-text-field @focus="toggleFocus()" @blur="toggleFocus()" v-model="search"
-                            placeholder="Where to, boss ?" class="mx-2 mx-md-4" dense hide-details solo
-                            style="max-width: 450px;">
-                            <template #prepend-inner>
-                                <v-icon :color="!isFocused ? 'grey' : undefined" class="ml-1 mr-2">
-                                    mdi-magnify
-                                </v-icon>
-                            </template>
-                        </v-text-field>
-
-                    </v-app-bar>
-
-                </v-card>
                 <!-- <input type="button" onclick="toggle();" value="▶️" id="toggle">
                 <input type="button" onclick="setList(true, 0);" value="🔀">
                 🔍<input id="search" type="text" onkeyup="setList(false, 0);"><span id="numres"></span>
@@ -64,10 +23,65 @@
                         <li>, / . Next/Prev page</li>
                     </ul>
                 </div> -->
-                <v-container fluid class="ma-0 pa-3 mt-8">
-                    <v-data-table :headers="tableHeaders" :items="list" :items-per-page="10" class="elevation-1">
-                    </v-data-table>
-                </v-container>
+<head>
+    <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@6.x/css/materialdesignicons.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+    <style>
+        body{
+            overflow: hidden;
+        }
+        .hud {
+            width: 100%;
+        }
+
+        .controls {
+            width: auto;
+        }
+        .top-row{
+            height: 8vh;
+        }
+        .middle-row{
+            height: 80vh;
+        }
+        .bottom-row{
+
+            height: 10vh;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <v-app>
+            <v-main>
+                <v-row class="top-row ma-0 pa-0">
+                        <v-app-bar class="pl-4 justify-center">
+    
+                            <v-toolbar-title>dStream</v-toolbar-title>
+                            <v-text-field @focus="toggleFocus()" @blur="toggleFocus()" v-model="search"
+                                placeholder="Where to, boss ?" class="mx-2 mx-md-4" dense hide-details solo
+                                style="max-width: 450px;">
+                                <template #prepend-inner>
+                                    <v-icon :color="!isFocused ? 'grey' : undefined" class="ml-1 mr-2">
+                                        mdi-magnify
+                                    </v-icon>
+                                </template>
+                            </v-text-field>
+    
+                        </v-app-bar>
+    
+                </v-row>
+                <v-row class="middle-row ma-0 pa-0">
+                    <v-container fluid class="ma-0 pa-0">
+                        <v-data-table :headers="tableHeaders" :items="list" :item-class="currentlyPlaying" item-key="id" @click:row="handleClick" :items-per-page="10" class="elevation-1">
+                        </v-data-table>
+                    </v-container>
+                </v-row>
+                <v-row class="bottom-row ma-0 pa-0">
+
                 <v-card class="hud" flat>
                     <v-container class="controls pb-0">
 
@@ -122,6 +136,7 @@
                         </v-row>
                     </v-container>
                 </v-card>
+                </v-row>
             </v-main>
         </v-app>
 
@@ -142,6 +157,7 @@
                 lastQuery: [],
                 random: false,
                 offset: 0,
+                queue : [],
                 list: [],
                 tableHeaders: [
                     { text: 'Title', align: 'start', value: 'title' },
@@ -153,16 +169,23 @@
                 ],
                 isFocused: false,
                 playing: false,
+                currentTrack: '',
                 audio : new Audio()
             },
 
             methods: {
+                handleClick(track){
+                    this.play(track.file)
+                },
                 refreshList: async function () {
                     this.list = await this.setList(this.search, this.random, this.offset)
                     console.log(this.list);
                 },
                 toggleFocus() {
                     this.isFocused = !this.isFocused;
+                },
+                currentlyPlaying(track){
+                    return track.file == this.currentTrack ? 'green--text' : ''
                 },
                 loadList: function (query, random, offset) {
                     this.lastQuery = query.split(" ");
@@ -210,7 +233,9 @@
 
                         if (offset === 0) {
                             pl.forEach((e) => {
-                                e.duration = 
+                                let minutes = Math.floor(e.duration/60)
+                                let seconds = Math.floor(e.duration%60) > 10 ? Math.floor(e.duration%60) : "0"+Math.floor(e.duration%60)
+                                e.duration = minutes + ":" + seconds
                                 e.score = 0;
                                 rules.forEach((r) => {
                                     if (e.title && e.title.match(r.r)) {
@@ -232,16 +257,49 @@
                 togglePlay() {
                     if (this.playing) {
                         this.playing = false;
-                        //audio.pause();
+                        this.audio.pause();
                     } else {
                         this.playing = true;
-                        //audio.play();
+                        this.audio.play();
                     }
                 },
                 stopAuto() {
                     this.cpl = -1;
-                    document.getElementById("status").innerHTML = "";
                     this.audio.src = "";
+                },
+                playNext() {
+                    queue.shift();
+                    setQueue();
+                    if (queue.length) {
+                        play(queue[0]);
+                    } else if (list.length && cpl !== -1 && cpl < list.length) {
+                        play(pl[cpl].file);
+                        document.getElementById("status").innerHTML =
+                        'Autoplay:<b onclick="stopAuto()" class="c">' +
+                        pl[cpl].file +
+                        '</b>&nbsp;&nbsp;&nbsp;<span id="playtime"></span>';
+                        cpl++;
+                    } else {
+                        cpl = -1;
+                        audio.src = "";
+                        document.getElementById("toggle").value = ".";
+                    }
+                },
+                add(file) {
+                    cpl = -1;
+                    queue.push(file);
+                    setQueue();
+                    if (queue.length === 1) {
+                        play(file);
+                    }
+                },
+                play(file) {
+                    this.audio.pause();
+                    this.audio.src = file;
+                    this.audio.load();
+                    this.audio.play();
+                    this.playing = true;
+                    this.currentTrack = file
                 }
             },
             watch: {
@@ -251,6 +309,7 @@
             },
             mounted() {
                 this.refreshList()
+                this.audio.addEventListener("ended", this.playNext);
             }
         })
     </script>
