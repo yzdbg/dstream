@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-                <!-- <input type="button" onclick="toggle();" value="▶️" id="toggle">
+<!-- <input type="button" onclick="toggle();" value="▶️" id="toggle">
                 <input type="button" onclick="setList(true, 0);" value="🔀">
                 🔍<input id="search" type="text" onkeyup="setList(false, 0);"><span id="numres"></span>
                 🔊<input type="range" min=0 max=100 value=100 id="vol"
@@ -23,16 +23,19 @@
                         <li>, / . Next/Prev page</li>
                     </ul>
                 </div> -->
+
 <head>
+    <title>dStream</title>
     <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/@mdi/font@6.x/css/materialdesignicons.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
     <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
     <style>
-        body{
+        body {
             overflow: hidden;
         }
+
         .hud {
             width: 100%;
         }
@@ -40,102 +43,156 @@
         .controls {
             width: auto;
         }
-        .top-row{
+
+        .top-row {
             height: 8vh;
         }
-        .middle-row{
+
+        .middle-row {
             height: 80vh;
+            overflow-y: scroll;
         }
-        .bottom-row{
+
+        .bottom-row {
 
             height: 10vh;
+        }
+        .volume-slider{
+            max-width: 100px;
+        }
+
+        .scroll::-webkit-scrollbar {
+            width: 15px;
+        }
+
+        .scroll::-webkit-scrollbar-track {
+            background: #202020;
+            border-left: 1px solid #2c2c2c;
+        }
+
+        .scroll::-webkit-scrollbar-thumb {
+            background: #3e3e3e;
+            border: solid 3px #202020;
+            border-radius: 7px;
+        }
+
+        .scroll::-webkit-scrollbar-thumb:hover {
+            background: gray;
         }
     </style>
 </head>
 
-<body>
+<body class="scroll">
     <div id="app">
         <v-app>
             <v-main>
                 <v-row class="top-row ma-0 pa-0">
-                        <v-app-bar class="pl-4 justify-center">
-    
-                            <v-toolbar-title>dStream</v-toolbar-title>
-                            <v-text-field @focus="toggleFocus()" @blur="toggleFocus()" v-model="search"
-                                placeholder="Where to, boss ?" class="mx-2 mx-md-4" dense hide-details solo
-                                style="max-width: 450px;">
-                                <template #prepend-inner>
-                                    <v-icon :color="!isFocused ? 'grey' : undefined" class="ml-1 mr-2">
-                                        mdi-magnify
-                                    </v-icon>
-                                </template>
-                            </v-text-field>
-    
-                        </v-app-bar>
-    
+                    <v-app-bar class="pl-4 justify-center">
+
+                        <v-toolbar-title>dStream</v-toolbar-title>
+                        <v-text-field @focus="toggleFocus()" @blur="toggleFocus()" v-model="search"
+                            placeholder="Search tracks..." class="mx-2 mx-md-4" dense hide-details solo
+                            style="max-width: 450px;">
+                            <template #prepend-inner>
+                                <v-icon :color="!isFocused ? 'grey' : undefined" class="ml-1 mr-2">
+                                    mdi-magnify
+                                </v-icon>
+                            </template>
+                        </v-text-field>
+
+                    </v-app-bar>
+
                 </v-row>
-                <v-row class="middle-row ma-0 pa-0">
+                <v-row class="scroll middle-row ma-0 pa-0">
                     <v-container fluid class="ma-0 pa-0">
-                        <v-data-table :headers="tableHeaders" :items="list" :item-class="currentlyPlaying" item-key="id" @click:row="handleClick" :items-per-page="10" class="elevation-1">
+                        <v-data-table :page="page"  checkbox-color="green" :headers="tableHeaders" :items="list" :item-class="currentlyPlaying" item-key="id"
+                            @update:page="updatePage" @current-items="updateCurrentList" @click:row="handleClick" :items-per-page="10" class="elevation-1">
                         </v-data-table>
                     </v-container>
                 </v-row>
                 <v-row class="bottom-row ma-0 pa-0">
 
-                <v-card class="hud" flat>
-                    <v-container class="controls pb-0">
+                    <v-card elevation="5" outlined class="hud">
+                        <v-row>
+                            <v-col sm="3" class="pa-0 pl-3 ma-0 d-flex flex-column align-center justify-center">
+                                <v-container class="pb-0 pt-0">{{currentTrack.title}}</v-container>
+                                <v-container class="grey--text text-caption pb-0 pt-0">{{currentTrack.artistName}}</v-container>
+                            </v-col>
+                            <v-col sm="6">
 
-                        <v-row justify="center" align="center" no-gutters>
+                        <v-container class="controls pb-0">
 
-                            <v-btn :color="shuffle ? 'green' : undefined" @click='toggleShuffle' icon>
-                                <v-icon>mdi-shuffle-variant</v-icon>
-                            </v-btn>
+                            <v-row justify="center" align="center" no-gutters>
 
-
-
-                            <v-btn @click='' icon>
-                                <v-icon>mdi-skip-previous</v-icon>
-                            </v-btn>
-
-
-
-                            <v-btn x-large @click='togglePlay' icon>
-                                <v-icon>{{playing ? 'mdi-pause-circle' : 'mdi-play-circle'}}</v-icon>
-                            </v-btn>
+                                <v-btn :color="shuffle ? 'green' : undefined" @click='toggleShuffle' icon>
+                                    <v-icon>mdi-shuffle-variant</v-icon>
+                                </v-btn>
 
 
-                            <v-btn @click='playNext' icon>
-                                <v-icon>mdi-skip-next</v-icon>
-                            </v-btn>
+
+                                <v-btn @click='playPrevious' icon>
+                                    <v-icon>mdi-skip-previous</v-icon>
+                                </v-btn>
 
 
-                            <v-btn @click='' icon>
-                                <v-icon>mdi-repeat</v-icon>
-                            </v-btn>
+
+                                <v-btn x-large @click='togglePlay' icon>
+                                    <v-icon>{{playing ? 'mdi-pause-circle' : 'mdi-play-circle'}}</v-icon>
+                                </v-btn>
+
+
+                                <v-btn @click='playNext' icon>
+                                    <v-icon>mdi-skip-next</v-icon>
+                                </v-btn>
+
+
+                                <v-btn @click='' icon>
+                                    <v-icon>mdi-repeat</v-icon>
+                                </v-btn>
+                            </v-row>
+                        </v-container>
+
+                        <v-container class=" mb-3 mt-0 pt-0">
+
+                            <v-row justify="center" no-gutters>
+                                <v-col sm="1">
+                                    <v-card  class="text-caption text-center" elevation="0">
+                                        {{currentTime ? currentTime : "0:00"}}
+                                    </v-card>
+                                </v-col>
+                                <v-col sm="10">
+                                    <v-card class="pt-2">
+                                        <v-progress-linear color="green" :value="trackProgress"></v-progress-linear>
+                                    </v-card>
+                                </v-col>
+                                <v-col sm="1">
+                                    <v-card class="text-caption text-center" elevation="0">
+                                        {{currentTrack.duration ? currentTrack.duration : "0:00"}}
+                                    </v-card>
+                                </v-col>
+                            </v-row>
+                        </v-container>
+                            </v-col>
+                            <v-col sm="3" class="d-flex justify-center align-center">
+                                <v-container class="d-flex justify-end align-center">
+                                        <v-btn @click="toggleSound" icon>
+                                            <v-icon small>
+                                                {{volume > 66 ? "mdi-volume-high" : volume > 33 ? "mdi-volume-medium" : volume > 0 ? "mdi-volume-low" : "mdi-volume-mute" }}
+                                            </v-icon>
+                                        </v-btn>
+
+                                        <v-slider
+                                        hide-details
+                                        max="100"
+                                        min="0"
+                                        v-model="volume"
+                                        color="green"
+                                        class="volume-slider mb-0 pb-0"
+                                        ></v-slider>
+                                </v-container>
+                            </v-col>
                         </v-row>
-                    </v-container>
-
-                    <v-container class=" mb-3 mt-0 pt-0">
-
-                        <v-row justify="center" no-gutters>
-                            <v-col sm="1">
-                                <v-card class="text-center" elevation="0">
-                                    {{currentTime ? currentTime : "0:00"}}
-                                </v-card>
-                            </v-col>
-                            <v-col sm="10">
-                                <v-card class="pt-2">
-                                    <v-progress-linear color="green"  :value="trackProgress"></v-progress-linear>
-                                </v-card>
-                            </v-col>
-                            <v-col sm="1">
-                                <v-card class="text-center" elevation="0">
-                                    {{currentTrack.duration}}
-                                </v-card>
-                            </v-col>
-                        </v-row>
-                    </v-container>
-                </v-card>
+                    </v-card>
                 </v-row>
             </v-main>
         </v-app>
@@ -150,6 +207,8 @@
                 theme: { dark: true }
             }),
             data: {
+                page:1,
+                volume: 100,
                 lastQuery: null,
                 search: '',
                 numberOfTracks: 0,
@@ -157,8 +216,9 @@
                 lastQuery: [],
                 random: false,
                 offset: 0,
-                queue : [],
+                queue: [],
                 list: [],
+                currentList: [],
                 tableHeaders: [
                     { text: 'Title', align: 'start', value: 'title' },
                     { text: 'Album', value: 'albumName' },
@@ -170,30 +230,29 @@
                 isFocused: false,
                 playing: false,
                 currentTrack: '',
-                audio : new Audio(),
-                shuffle: false
+                audio: new Audio(),
+                shuffle: false,
+                history: []
             },
 
             methods: {
-                handleClick(track){
+                handleClick(track) {
                     this.play(track)
                 },
 
                 refreshList: async function () {
                     this.list = await this.setList(this.search, this.random, this.offset)
-                    console.log(this.list);
                 },
 
-                toggleShuffle(){
+                toggleShuffle() {
                     this.shuffle = !this.shuffle;
-                    console.log(this.shuffle)
                 },
 
                 toggleFocus() {
                     this.isFocused = !this.isFocused;
                 },
 
-                currentlyPlaying(track){
+                currentlyPlaying(track) {
                     return track.file == this.currentTrack.file ? 'green--text' : ''
                 },
 
@@ -243,8 +302,8 @@
 
                         if (offset === 0) {
                             pl.forEach((e) => {
-                                let minutes = Math.floor(e.duration/60)
-                                let seconds = Math.floor(e.duration%60) >= 10 ? Math.floor(e.duration%60) : "0"+Math.floor(e.duration%60)
+                                let minutes = Math.floor(e.duration / 60)
+                                let seconds = Math.floor(e.duration % 60) >= 10 ? Math.floor(e.duration % 60) : "0" + Math.floor(e.duration % 60)
                                 e.durationRaw = e.duration
                                 e.duration = minutes + ":" + seconds
                                 e.score = 0;
@@ -274,17 +333,44 @@
                         this.audio.play();
                     }
                 },
+                toggleSound(){
+                    if(this.volume){
+                        this.volumeCache = this.volume
+                        this.volume=0   
+                    }
+                    else{
+                        this.volume = this.volumeCache
+                    }
+                },
                 stopAuto() {
                     this.cpl = -1;
                     this.audio.src = "";
                 },
                 playNext() {
-                    if(this.shuffle){
+                    this.history.unshift(this.currentTrack)
+                    if (this.shuffle) {
                         let next = this.list[Math.floor(Math.random() * this.list.length)]
                         this.play(next)
                     }
-                    else{
-                        
+                    else {
+                        let currentIndex = this.currentList.indexOf(this.currentTrack)
+                        if(currentIndex == this.currentList.length - 1){
+                            this.page++;
+                            let s = this
+                            setTimeout(function(){
+                                
+                                s.play(s.currentList[0])
+                                }, 1);
+                        }
+                        else{
+                            this.play(this.currentList[currentIndex+1])
+                        }
+                    }
+                },
+                playPrevious(){
+                    if(this.history.length){
+                        this.play(this.history[0])
+                        this.history.shift()
                     }
                 },
                 add(file) {
@@ -302,26 +388,35 @@
                     this.audio.play();
                     this.playing = true;
                     this.currentTrack = track
-                    console.log(this.currentTrack)
                 },
-                updateTime(){
+                updateTime() {
                     this.time = this.audio.currentTime
+                },
+                updateCurrentList(items){
+                    this.currentList = items
+                    console.log(this.currentList)
+                },
+                updatePage(newPage){
+                    this.page = newPage
                 }
             },
             watch: {
-                search: async function(){
+                search: async function () {
                     this.refreshList()
+                },
+                volume:function(){
+                    this.audio.volume = this.volume/100
                 }
             },
-            computed:{
-                currentTime(){
+            computed: {
+                currentTime() {
 
-                    let minutes = Math.floor(this.time/60)
-                    let seconds = Math.floor(this.time%60) >= 10 ? Math.floor(this.time%60) : "0"+Math.floor(this.time%60)
+                    let minutes = Math.floor(this.time / 60)
+                    let seconds = Math.floor(this.time % 60) >= 10 ? Math.floor(this.time % 60) : "0" + Math.floor(this.time % 60)
                     return minutes + ":" + seconds
                 },
-                trackProgress(){
-                    return this.time/this.currentTrack.durationRaw*100
+                trackProgress() {
+                    return this.time / this.currentTrack.durationRaw * 100
                 }
             },
             mounted() {
