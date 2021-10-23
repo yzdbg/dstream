@@ -87,7 +87,7 @@
 
                         <v-row justify="center" align="center" no-gutters>
 
-                            <v-btn @click='' icon>
+                            <v-btn :color="shuffle ? 'green' : undefined" @click='toggleShuffle' icon>
                                 <v-icon>mdi-shuffle-variant</v-icon>
                             </v-btn>
 
@@ -104,7 +104,7 @@
                             </v-btn>
 
 
-                            <v-btn @click='' icon>
+                            <v-btn @click='playNext' icon>
                                 <v-icon>mdi-skip-next</v-icon>
                             </v-btn>
 
@@ -120,17 +120,17 @@
                         <v-row justify="center" no-gutters>
                             <v-col sm="1">
                                 <v-card class="text-center" elevation="0">
-                                    00:00
+                                    {{currentTime ? currentTime : "0:00"}}
                                 </v-card>
                             </v-col>
                             <v-col sm="10">
                                 <v-card class="pt-2">
-                                    <v-progress-linear v-model="time" value="15"></v-progress-linear>
+                                    <v-progress-linear color="green"  :value="trackProgress"></v-progress-linear>
                                 </v-card>
                             </v-col>
                             <v-col sm="1">
                                 <v-card class="text-center" elevation="0">
-                                    03:00
+                                    {{currentTrack.duration}}
                                 </v-card>
                             </v-col>
                         </v-row>
@@ -170,23 +170,33 @@
                 isFocused: false,
                 playing: false,
                 currentTrack: '',
-                audio : new Audio()
+                audio : new Audio(),
+                shuffle: false
             },
 
             methods: {
                 handleClick(track){
-                    this.play(track.file)
+                    this.play(track)
                 },
+
                 refreshList: async function () {
                     this.list = await this.setList(this.search, this.random, this.offset)
                     console.log(this.list);
                 },
+
+                toggleShuffle(){
+                    this.shuffle = !this.shuffle;
+                    console.log(this.shuffle)
+                },
+
                 toggleFocus() {
                     this.isFocused = !this.isFocused;
                 },
+
                 currentlyPlaying(track){
-                    return track.file == this.currentTrack ? 'green--text' : ''
+                    return track.file == this.currentTrack.file ? 'green--text' : ''
                 },
+
                 loadList: function (query, random, offset) {
                     this.lastQuery = query.split(" ");
 
@@ -234,7 +244,8 @@
                         if (offset === 0) {
                             pl.forEach((e) => {
                                 let minutes = Math.floor(e.duration/60)
-                                let seconds = Math.floor(e.duration%60) > 10 ? Math.floor(e.duration%60) : "0"+Math.floor(e.duration%60)
+                                let seconds = Math.floor(e.duration%60) >= 10 ? Math.floor(e.duration%60) : "0"+Math.floor(e.duration%60)
+                                e.durationRaw = e.duration
                                 e.duration = minutes + ":" + seconds
                                 e.score = 0;
                                 rules.forEach((r) => {
@@ -268,21 +279,12 @@
                     this.audio.src = "";
                 },
                 playNext() {
-                    queue.shift();
-                    setQueue();
-                    if (queue.length) {
-                        play(queue[0]);
-                    } else if (list.length && cpl !== -1 && cpl < list.length) {
-                        play(pl[cpl].file);
-                        document.getElementById("status").innerHTML =
-                        'Autoplay:<b onclick="stopAuto()" class="c">' +
-                        pl[cpl].file +
-                        '</b>&nbsp;&nbsp;&nbsp;<span id="playtime"></span>';
-                        cpl++;
-                    } else {
-                        cpl = -1;
-                        audio.src = "";
-                        document.getElementById("toggle").value = ".";
+                    if(this.shuffle){
+                        let next = this.list[Math.floor(Math.random() * this.list.length)]
+                        this.play(next)
+                    }
+                    else{
+                        
                     }
                 },
                 add(file) {
@@ -293,13 +295,17 @@
                         play(file);
                     }
                 },
-                play(file) {
+                play(track) {
                     this.audio.pause();
-                    this.audio.src = file;
+                    this.audio.src = track.file;
                     this.audio.load();
                     this.audio.play();
                     this.playing = true;
-                    this.currentTrack = file
+                    this.currentTrack = track
+                    console.log(this.currentTrack)
+                },
+                updateTime(){
+                    this.time = this.audio.currentTime
                 }
             },
             watch: {
@@ -307,9 +313,21 @@
                     this.refreshList()
                 }
             },
+            computed:{
+                currentTime(){
+
+                    let minutes = Math.floor(this.time/60)
+                    let seconds = Math.floor(this.time%60) >= 10 ? Math.floor(this.time%60) : "0"+Math.floor(this.time%60)
+                    return minutes + ":" + seconds
+                },
+                trackProgress(){
+                    return this.time/this.currentTrack.durationRaw*100
+                }
+            },
             mounted() {
                 this.refreshList()
                 this.audio.addEventListener("ended", this.playNext);
+                this.audio.addEventListener("timeupdate", this.updateTime);
             }
         })
     </script>
