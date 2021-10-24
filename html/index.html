@@ -57,7 +57,8 @@
 
             height: 10vh;
         }
-        .volume-slider{
+
+        .volume-slider {
             max-width: 100px;
         }
 
@@ -79,10 +80,13 @@
         .scroll::-webkit-scrollbar-thumb:hover {
             background: gray;
         }
+        .no-scroll::-webkit-scrollbar {
+            width: 0px;
+        }
     </style>
 </head>
 
-<body class="scroll">
+<body class="no-scroll">
     <div id="app">
         <v-app>
             <v-main>
@@ -105,8 +109,20 @@
                 </v-row>
                 <v-row class="scroll middle-row ma-0 pa-0">
                     <v-container fluid class="ma-0 pa-0">
-                        <v-data-table :page="page"  checkbox-color="green" :headers="tableHeaders" :items="list" :item-class="currentlyPlaying" item-key="id"
-                            @update:page="updatePage" @current-items="updateCurrentList" @click:row="handleClick" :items-per-page="10" class="elevation-1">
+                        <v-data-table 
+                        item-key="id" 
+                        :dense="dense" 
+                        :page="page" 
+                        checkbox-color="green" 
+                        :headers="tableHeaders"
+                        :items="list" 
+                        :item-class="currentlyPlaying" 
+                        :items-per-page="-1"
+                        @update:page="updatePage"
+                        @current-items="updateCurrentList" 
+                        @page-count="updateTotalPages"
+                        @click:row="handleClick" 
+                        class="elevation-1">
                         </v-data-table>
                     </v-container>
                 </v-row>
@@ -116,79 +132,76 @@
                         <v-row>
                             <v-col sm="3" class="pa-0 pl-3 ma-0 d-flex flex-column align-center justify-center">
                                 <v-container class="pb-0 pt-0">{{currentTrack.title}}</v-container>
-                                <v-container class="grey--text text-caption pb-0 pt-0">{{currentTrack.artistName}}</v-container>
+                                <v-container class="grey--text text-caption pb-0 pt-0">{{currentTrack.artistName}}
+                                </v-container>
                             </v-col>
                             <v-col sm="6">
 
-                        <v-container class="controls pb-0">
+                                <v-container class="controls pb-0">
 
-                            <v-row justify="center" align="center" no-gutters>
+                                    <v-row justify="center" align="center" no-gutters>
 
-                                <v-btn :color="shuffle ? 'green' : undefined" @click='toggleShuffle' icon>
-                                    <v-icon>mdi-shuffle-variant</v-icon>
-                                </v-btn>
-
-
-
-                                <v-btn @click='playPrevious' icon>
-                                    <v-icon>mdi-skip-previous</v-icon>
-                                </v-btn>
+                                        <v-btn :color="shuffle ? 'green' : undefined" @click='toggleShuffle' icon>
+                                            <v-icon>mdi-shuffle-variant</v-icon>
+                                        </v-btn>
 
 
 
-                                <v-btn x-large @click='togglePlay' icon>
-                                    <v-icon>{{playing ? 'mdi-pause-circle' : 'mdi-play-circle'}}</v-icon>
-                                </v-btn>
+                                        <v-btn @click='playPrevious' icon>
+                                            <v-icon>mdi-skip-previous</v-icon>
+                                        </v-btn>
 
 
-                                <v-btn @click='playNext' icon>
-                                    <v-icon>mdi-skip-next</v-icon>
-                                </v-btn>
+
+                                        <v-btn x-large @click='togglePlay' icon>
+                                            <v-icon>{{playing ? 'mdi-pause-circle' : 'mdi-play-circle'}}</v-icon>
+                                        </v-btn>
 
 
-                                <v-btn @click='' icon>
-                                    <v-icon>mdi-repeat</v-icon>
-                                </v-btn>
-                            </v-row>
-                        </v-container>
+                                        <v-btn @click='playNext' icon>
+                                            <v-icon>mdi-skip-next</v-icon>
+                                        </v-btn>
 
-                        <v-container class=" mb-3 mt-0 pt-0">
 
-                            <v-row justify="center" no-gutters>
-                                <v-col sm="1">
-                                    <v-card  class="text-caption text-center" elevation="0">
-                                        {{currentTime ? currentTime : "0:00"}}
-                                    </v-card>
-                                </v-col>
-                                <v-col sm="10">
-                                    <v-card class="pt-2">
-                                        <v-progress-linear color="green" :value="trackProgress"></v-progress-linear>
-                                    </v-card>
-                                </v-col>
-                                <v-col sm="1">
-                                    <v-card class="text-caption text-center" elevation="0">
-                                        {{currentTrack.duration ? currentTrack.duration : "0:00"}}
-                                    </v-card>
-                                </v-col>
-                            </v-row>
-                        </v-container>
+                                        <v-btn @click='' icon>
+                                            <v-icon>mdi-repeat</v-icon>
+                                        </v-btn>
+                                    </v-row>
+                                </v-container>
+
+                                <v-container class=" mb-3 mt-0 pt-0">
+
+                                    <v-row justify="center" no-gutters>
+                                        <v-col sm="1">
+                                            <v-card class="text-caption text-center" elevation="0">
+                                                {{currentTime ? currentTime : "0:00"}}
+                                            </v-card>
+                                        </v-col>
+                                        <v-col sm="10">
+                                            <v-card class="pt-2">
+                                                <v-progress-linear color="green" :value="trackProgress">
+                                                </v-progress-linear>
+                                            </v-card>
+                                        </v-col>
+                                        <v-col sm="1">
+                                            <v-card class="text-caption text-center" elevation="0">
+                                                {{currentTrack.duration ? currentTrack.duration : "0:00"}}
+                                            </v-card>
+                                        </v-col>
+                                    </v-row>
+                                </v-container>
                             </v-col>
                             <v-col sm="3" class="d-flex justify-center align-center">
                                 <v-container class="d-flex justify-end align-center">
-                                        <v-btn @click="toggleSound" icon>
-                                            <v-icon small>
-                                                {{volume > 66 ? "mdi-volume-high" : volume > 33 ? "mdi-volume-medium" : volume > 0 ? "mdi-volume-low" : "mdi-volume-mute" }}
-                                            </v-icon>
-                                        </v-btn>
+                                    <v-btn @click="toggleSound" icon>
+                                        <v-icon small>
+                                            {{volume > 66 ? "mdi-volume-high" : volume > 33 ? "mdi-volume-medium" :
+                                            volume > 0 ? "mdi-volume-low" : "mdi-volume-mute" }}
+                                        </v-icon>
+                                    </v-btn>
 
-                                        <v-slider
-                                        hide-details
-                                        max="100"
-                                        min="0"
-                                        v-model="volume"
-                                        color="green"
-                                        class="volume-slider mb-0 pb-0"
-                                        ></v-slider>
+                                    <v-slider hide-details max="100" min="0" v-model="volume" color="green"
+                                        class="volume-slider mb-0 pb-0"></v-slider>
                                 </v-container>
                             </v-col>
                         </v-row>
@@ -207,7 +220,8 @@
                 theme: { dark: true }
             }),
             data: {
-                page:1,
+                dense: false,
+                page: 1,
                 volume: 100,
                 lastQuery: null,
                 search: '',
@@ -220,6 +234,7 @@
                 list: [],
                 currentList: [],
                 tableHeaders: [
+                    { text: '#', align: 'start',sortable: false, value: 'id' },
                     { text: 'Title', align: 'start', value: 'title' },
                     { text: 'Album', value: 'albumName' },
                     { text: 'Duration', value: 'duration' },
@@ -232,12 +247,18 @@
                 currentTrack: '',
                 audio: new Audio(),
                 shuffle: false,
-                history: []
+                history: [],
+                totalPages: 0
             },
 
             methods: {
                 handleClick(track) {
                     this.play(track)
+                },
+
+                updateTotalPages(total){
+                    this.totalPages = total;
+                    this.history = []
                 },
 
                 refreshList: async function () {
@@ -333,12 +354,12 @@
                         this.audio.play();
                     }
                 },
-                toggleSound(){
-                    if(this.volume){
+                toggleSound() {
+                    if (this.volume) {
                         this.volumeCache = this.volume
-                        this.volume=0   
+                        this.volume = 0
                     }
-                    else{
+                    else {
                         this.volume = this.volumeCache
                     }
                 },
@@ -347,30 +368,63 @@
                     this.audio.src = "";
                 },
                 playNext() {
-                    this.history.unshift(this.currentTrack)
+                    if(this.currentTrack != this.history[0]){
+                        this.history.unshift({
+                            track : this.currentTrack,
+                            page: this.page
+                        })
+                    }
                     if (this.shuffle) {
-                        let next = this.list[Math.floor(Math.random() * this.list.length)]
-                        this.play(next)
+                        this.page = Math.floor(Math.random() * this.totalPages)
+                        let s = this
+                        setTimeout(function(){
+                            let next = s.currentList[Math.floor(Math.random() * s.currentList.length)]
+                            s.play(next)
+                        }, 1);
                     }
                     else {
-                        let currentIndex = this.currentList.indexOf(this.currentTrack)
-                        if(currentIndex == this.currentList.length - 1){
-                            this.page++;
+                        let currentIndex = this.currentTrack ? this.currentList.indexOf(this.currentTrack) : 0
+                        console.log("Current index", currentIndex)
+                        if (currentIndex == this.currentList.length - 1) {
+                            if(this.page != this.totalPages){
+                                this.page++;
                             let s = this
-                            setTimeout(function(){
-                                
+                            setTimeout(function () {
+
                                 s.play(s.currentList[0])
-                                }, 1);
+                            }, 1);
+                            }
                         }
-                        else{
-                            this.play(this.currentList[currentIndex+1])
+                        else {
+                            this.play(this.currentList[currentIndex + 1])
                         }
                     }
                 },
-                playPrevious(){
-                    if(this.history.length){
-                        this.play(this.history[0])
+                playPrevious() {
+                    let currentIndex = this.currentTrack ? this.currentList.indexOf(this.currentTrack) : 0 
+                   
+
+                    if (this.shuffle && this.history.length) {
+                        console.log("got here", this.history[0].track.title, this.history[0].page)
+                        this.page = this.history[0].page
+                        this.play(this.history[0].track)
                         this.history.shift()
+                    }
+                    else {
+                        if (currentIndex == 0) {
+                            if (this.page != 1) {
+                                this.page--
+
+                                let s = this
+                                setTimeout(function () {
+
+                                    s.play(s.currentList[s.currentList.length - 1])
+                                }, 1);
+                            }
+                        }
+                        else {
+                            this.play(this.currentList[currentIndex - 1])
+                        }
                     }
                 },
                 add(file) {
@@ -382,21 +436,22 @@
                     }
                 },
                 play(track) {
-                    this.audio.pause();
-                    this.audio.src = track.file;
-                    this.audio.load();
-                    this.audio.play();
-                    this.playing = true;
-                    this.currentTrack = track
+                    if(track != this.currentTrack){
+                        this.audio.pause();
+                        this.audio.src = track.file;
+                        this.audio.load();
+                        this.audio.play();
+                        this.playing = true;
+                        this.currentTrack = track
+                    }
                 },
                 updateTime() {
                     this.time = this.audio.currentTime
                 },
-                updateCurrentList(items){
+                updateCurrentList(items) {
                     this.currentList = items
-                    console.log(this.currentList)
                 },
-                updatePage(newPage){
+                updatePage(newPage) {
                     this.page = newPage
                 }
             },
@@ -404,8 +459,8 @@
                 search: async function () {
                     this.refreshList()
                 },
-                volume:function(){
-                    this.audio.volume = this.volume/100
+                volume: function () {
+                    this.audio.volume = this.volume / 100
                 }
             },
             computed: {
