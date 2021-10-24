@@ -37,6 +37,8 @@
         }
 
         .hud {
+
+            height: 100%;
             width: 100%;
         }
 
@@ -46,6 +48,7 @@
 
         .top-row {
             height: 8vh;
+            width: 100%;
         }
 
         .middle-row {
@@ -54,9 +57,8 @@
         }
 
         .bottom-row {
-
-            height: 10vh;
-        }
+            height: 12vh;
+        }   
 
         .volume-slider {
             max-width: 100px;
@@ -90,21 +92,25 @@
     <div id="app">
         <v-app>
             <v-main>
-                <v-row class="top-row ma-0 pa-0">
-                    <v-app-bar class="pl-4 justify-center">
+                <v-row class=" ma-0 pa-0">
+                    <v-card
+                    tile
+                    class="grey darken-4 top-row d-flex justify-center align center pl-4">
 
-                        <v-toolbar-title>dStream</v-toolbar-title>
-                        <v-text-field @focus="toggleFocus()" @blur="toggleFocus()" v-model="search"
-                            placeholder="Search tracks..." class="mx-2 mx-md-4" dense hide-details solo
-                            style="max-width: 450px;">
-                            <template #prepend-inner>
-                                <v-icon :color="!isFocused ? 'grey' : undefined" class="ml-1 mr-2">
-                                    mdi-magnify
-                                </v-icon>
-                            </template>
-                        </v-text-field>
+                        <h2 class="grey--text lighten-2 pl-4 d-flex justify-center align-center" >dStream</h2>
+                        <v-container class="d-flex justify-center align-center">
+                            <v-text-field @focus="toggleFocus()" @blur="toggleFocus()" v-model="search"
+                                placeholder="Search tracks..." class=" mx-2 mx-md-4" dense hide-details solo
+                                style="max-width: 450px;">
+                                <template #prepend-inner>
+                                    <v-icon :color="!isFocused ? 'grey' : undefined" class="ml-1 mr-2">
+                                        mdi-magnify
+                                    </v-icon>
+                                </template>
+                            </v-text-field>
+                        </v-container>
 
-                    </v-app-bar>
+                    </v-card>
 
                 </v-row>
                 <v-row class="scroll middle-row ma-0 pa-0">
@@ -128,16 +134,15 @@
                 </v-row>
                 <v-row class="bottom-row ma-0 pa-0">
 
-                    <v-card elevation="5" outlined class="hud">
-                        <v-row>
+                    <v-card elevation="5" class="grey darken-4 hud d-flex flex-row align-center justify-center">
                             <v-col sm="3" class="pa-0 pl-3 ma-0 d-flex flex-column align-center justify-center">
                                 <v-container class="pb-0 pt-0">{{currentTrack.title}}</v-container>
                                 <v-container class="grey--text text-caption pb-0 pt-0">{{currentTrack.artistName}}
                                 </v-container>
                             </v-col>
-                            <v-col sm="6">
+                            <v-col class="pa-0 ma-0" sm="6">
 
-                                <v-container class="controls pb-0">
+                                <v-container class="controls pa-0 ma-0">
 
                                     <v-row justify="center" align="center" no-gutters>
 
@@ -169,22 +174,24 @@
                                     </v-row>
                                 </v-container>
 
-                                <v-container class=" mb-3 mt-0 pt-0">
+                                <v-container class=" ma-0 pa-0">
 
                                     <v-row justify="center" no-gutters>
-                                        <v-col sm="1">
-                                            <v-card class="text-caption text-center" elevation="0">
+                                        <v-col  class="d-flex justify-center align-center" sm="1">
+                                            <v-card  class="grey darken-4 grey--text text-caption text-center align-center" elevation="0">
                                                 {{currentTime ? currentTime : "0:00"}}
                                             </v-card>
                                         </v-col>
-                                        <v-col sm="10">
-                                            <v-card class="pt-2">
-                                                <v-progress-linear color="green" :value="trackProgress">
-                                                </v-progress-linear>
+                                        <v-col class="" sm="10">
+                                            <v-card flat>
+                                                <v-hover v-slot="{hover}">
+                                                    <v-slider class="grey darken-4" @click="updatePlaybackTime" hide-details :track-fill-color="hover ? 'green' : 'white'" :color="hover ? 'white' : 'transparent'" max="100" min="0" :value="trackProgress">
+                                                    </v-slider>
+                                                </v-hover>
                                             </v-card>
                                         </v-col>
-                                        <v-col sm="1">
-                                            <v-card class="text-caption text-center" elevation="0">
+                                        <v-col class="d-flex justify-center align-center" sm="1">
+                                            <v-card  class="grey darken-4 grey--text text-caption text-center align-center" elevation="0">
                                                 {{currentTrack.duration ? currentTrack.duration : "0:00"}}
                                             </v-card>
                                         </v-col>
@@ -199,12 +206,14 @@
                                             volume > 0 ? "mdi-volume-low" : "mdi-volume-mute" }}
                                         </v-icon>
                                     </v-btn>
-
-                                    <v-slider hide-details max="100" min="0" v-model="volume" color="green"
+                                    <v-hover
+                                    v-slot="{ hover }"
+                                    >
+                                    <v-slider :track-fill-color="hover ? 'green' : 'white'" :color="hover ? 'white' : 'transparent'" hide-details max="100" min="0" v-model="volume" 
                                         class="volume-slider mb-0 pb-0"></v-slider>
+                                    </v-hover>
                                 </v-container>
                             </v-col>
-                        </v-row>
                     </v-card>
                 </v-row>
             </v-main>
@@ -236,11 +245,10 @@
                 tableHeaders: [
                     { text: '#', align: 'start',sortable: false, value: 'id' },
                     { text: 'Title', align: 'start', value: 'title' },
-                    { text: 'Album', value: 'albumName' },
-                    { text: 'Duration', value: 'duration' },
                     { text: 'Artist', value: 'artistName' },
-                    { text: 'Year', value: 'year' },
+                    { text: 'Album', value: 'albumName' },
                     { text: 'Codec', value: 'codec' },
+                    { text: '◷', value: 'duration' },
                 ],
                 isFocused: false,
                 playing: false,
@@ -252,6 +260,9 @@
             },
 
             methods: {
+                updatePlaybackTime(){
+                },
+
                 handleClick(track) {
                     this.play(track)
                 },
@@ -267,6 +278,7 @@
 
                 toggleShuffle() {
                     this.shuffle = !this.shuffle;
+                    this.history = []
                 },
 
                 toggleFocus() {
@@ -404,11 +416,13 @@
                     let currentIndex = this.currentTrack ? this.currentList.indexOf(this.currentTrack) : 0 
                    
 
-                    if (this.shuffle && this.history.length) {
-                        console.log("got here", this.history[0].track.title, this.history[0].page)
-                        this.page = this.history[0].page
-                        this.play(this.history[0].track)
-                        this.history.shift()
+                    if (this.shuffle ) {
+                        if(this.history.length){
+                            console.log("got here", this.history[0].track.title, this.history[0].page)
+                            this.page = this.history[0].page
+                            this.play(this.history[0].track)
+                            this.history.shift()
+                        }
                     }
                     else {
                         if (currentIndex == 0) {
@@ -461,6 +475,8 @@
                 },
                 volume: function () {
                     this.audio.volume = this.volume / 100
+                },
+                time : function(){
                 }
             },
             computed: {
