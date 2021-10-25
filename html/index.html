@@ -93,22 +93,39 @@
         <v-app>
             <v-main>
                 <v-row class=" ma-0 pa-0">
+
                     <v-card
                     tile
                     class="grey darken-4 top-row d-flex justify-center align center pl-4">
 
+                    <v-col cols="2" class="d-flex justify-center align-center">
                         <h2 class="grey--text lighten-2 pl-4 d-flex justify-center align-center" >dStream</h2>
-                        <v-container class="d-flex justify-center align-center">
-                            <v-text-field @focus="toggleFocus()" @blur="toggleFocus()" v-model="search"
-                                placeholder="Search tracks..." class=" mx-2 mx-md-4" dense hide-details solo
-                                style="max-width: 450px;">
-                                <template #prepend-inner>
-                                    <v-icon :color="!isFocused ? 'grey' : undefined" class="ml-1 mr-2">
-                                        mdi-magnify
-                                    </v-icon>
-                                </template>
-                            </v-text-field>
-                        </v-container>
+                      </v-col>
+                      <v-col class="d-flex justify-space-around">                        <v-container class="d-flex justify-center align-center">
+                        <v-text-field @focus="toggleFocus()" @blur="toggleFocus()" v-model="search" dense
+                            placeholder="Search tracks..." class=" mx-2 mx-md-4" color="green" rounded hide-details flat filled
+                            style="max-width: 450px;">
+                            <template #prepend-inner>
+                                <v-icon :color="!isFocused ? 'grey' : undefined" class="ml-1 mr-2">
+                                    mdi-magnify
+                                </v-icon>
+                            </template>
+                        </v-text-field>
+                    </v-container>
+                      </v-col>
+                      <v-col cols="2" class="d-flex justify-end">
+
+                        <v-tooltip bottom>
+                            <template v-slot:activator="{ on, attrs }">
+                              <v-btn class="mr-4" :loading="scanning" v-bind="attrs" 
+                              v-on="on" @click='scan' icon>
+                                <v-icon>mdi-cached</v-icon>
+                            </v-btn>
+                            </template>
+                            <span>Scan music folder</span>
+                          </v-tooltip>
+                      </v-col>
+
 
                     </v-card>
 
@@ -147,29 +164,29 @@
                                     <v-row justify="center" align="center" no-gutters>
 
                                         <v-btn :color="shuffle ? 'green' : undefined" @click='toggleShuffle' icon>
-                                            <v-icon>mdi-shuffle-variant</v-icon>
+                                            <v-icon small>mdi-shuffle-variant</v-icon>
                                         </v-btn>
 
 
 
                                         <v-btn @click='playPrevious' icon>
-                                            <v-icon>mdi-skip-previous</v-icon>
+                                            <v-icon medium>mdi-skip-previous</v-icon>
                                         </v-btn>
 
 
 
-                                        <v-btn x-large @click='togglePlay' icon>
-                                            <v-icon>{{playing ? 'mdi-pause-circle' : 'mdi-play-circle'}}</v-icon>
+                                        <v-btn  @click='togglePlay' icon>
+                                            <v-icon x-large>{{playing ? 'mdi-pause-circle' : 'mdi-play-circle'}}</v-icon>
                                         </v-btn>
 
 
                                         <v-btn @click='playNext' icon>
-                                            <v-icon>mdi-skip-next</v-icon>
+                                            <v-icon medium>mdi-skip-next</v-icon>
                                         </v-btn>
 
 
-                                        <v-btn @click='' icon>
-                                            <v-icon>mdi-repeat</v-icon>
+                                        <v-btn @click='toggleRepeat' :color="repeat ? 'green' : undefined" icon>
+                                            <v-icon small>{{repeatSong ? 'mdi-repeat-once' : 'mdi-repeat'}}</v-icon>
                                         </v-btn>
                                     </v-row>
                                 </v-container>
@@ -185,7 +202,7 @@
                                         <v-col class="" sm="10">
                                             <v-card flat>
                                                 <v-hover v-slot="{hover}">
-                                                    <v-slider class="grey darken-4" @click="updatePlaybackTime" hide-details :track-fill-color="hover ? 'green' : 'white'" :color="hover ? 'white' : 'transparent'" max="100" min="0" :value="trackProgress">
+                                                    <v-slider class="grey darken-4" @mousedown="md" @mouseup="mu" hide-details :track-fill-color="hover ? 'green' : 'white'" :color="hover ? 'white' : 'transparent'" max="1000" min="0" v-model="progress">
                                                     </v-slider>
                                                 </v-hover>
                                             </v-card>
@@ -229,6 +246,10 @@
                 theme: { dark: true }
             }),
             data: {
+                repeat: false,
+                repeatSong: false,
+                userInput: null,
+                userTimeInputInProgress: false,
                 dense: false,
                 page: 1,
                 volume: 100,
@@ -256,11 +277,32 @@
                 audio: new Audio(),
                 shuffle: false,
                 history: [],
-                totalPages: 0
+                totalPages: 0,
+                scanning: false
             },
 
             methods: {
-                updatePlaybackTime(){
+                toggleRepeat(){
+                    if(this.repeat){
+                        if(this.repeatSong){
+                            this.repeatSong = false
+                            this.repeat = false
+                        }
+                        else{
+                            this.repeatSong = true
+                        }
+                    }
+                    else{
+                        this.repeat = true
+                    }
+                },
+                md(){
+                    this.userTimeInputInProgress = true
+                },                
+                
+                mu(){
+                    this.audio.currentTime = this.currentTrack.durationRaw * this.userInput/1000
+                    this.userTimeInputInProgress = false
                 },
 
                 handleClick(track) {
@@ -306,6 +348,27 @@
                         .then((blob) => {
                             return blob.text();
                         });
+                },
+
+                scan: async function () {
+                    if(!this.scanning){
+                        this.scanning = true
+
+                        let request = new Request('/scan?start=true')
+                        return fetch(request)
+                            .then((response) => {
+                                console.log(response)
+                                this.scanning = false
+                                return response.blob();
+                            })
+                            .then((blob) => {
+                                console.log(blob)
+                                return blob.text()
+                        }).then(((status)=>{
+                            this.refreshList()
+                            console.log(this.list)
+                        }))
+                    }
                 },
 
                 setList: async function (query, random, offset) {
@@ -380,6 +443,13 @@
                     this.audio.src = "";
                 },
                 playNext() {
+                    if(this.repeatSong){
+                        console.log("got here")
+                        this.audio.src = ""
+                        this.play(this.currentTrack)
+                        return
+                    }
+
                     if(this.currentTrack != this.history[0]){
                         this.history.unshift({
                             track : this.currentTrack,
@@ -450,7 +520,7 @@
                     }
                 },
                 play(track) {
-                    if(track != this.currentTrack){
+                    if(track != this.currentTrack || this.repeatSong){
                         this.audio.pause();
                         this.audio.src = track.file;
                         this.audio.load();
@@ -467,7 +537,7 @@
                 },
                 updatePage(newPage) {
                     this.page = newPage
-                }
+                },
             },
             watch: {
                 search: async function () {
@@ -486,11 +556,26 @@
                     let seconds = Math.floor(this.time % 60) >= 10 ? Math.floor(this.time % 60) : "0" + Math.floor(this.time % 60)
                     return minutes + ":" + seconds
                 },
-                trackProgress() {
-                    return this.time / this.currentTrack.durationRaw * 100
+                progress: {
+                    get: function () {
+                            if(!this.userTimeInputInProgress){
+                                return this.time / this.currentTrack.durationRaw * 1000
+                            }
+                            else{
+                                return this.userInput
+                            }
+                    },
+                    set: function (newValue) {
+                        if(this.userTimeInputInProgress && newValue!=0 && newValue!=1000){
+                            this.userInput = newValue
+                        }
+                    }
+
+
                 }
             },
             mounted() {
+                this.scan()
                 this.refreshList()
                 this.audio.addEventListener("ended", this.playNext);
                 this.audio.addEventListener("timeupdate", this.updateTime);

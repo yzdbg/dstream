@@ -61,8 +61,8 @@ app.use("/tracks.json", (req, res) => {
 
   db.each(
     "SELECT track.id as id, year, duration,codec, file, title, artist.name AS artistName, album.name AS albumName FROM track INNER JOIN artist ON artist.id=track.artist INNER JOIN album ON album.id=track.album WHERE" +
-      likes +
-      " LIMIT 5000",
+    likes +
+    " LIMIT 5000",
     qargs,
     (err, row) => {
       if (err) {
@@ -97,7 +97,7 @@ app.use("/browse.json", (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`Server listening at on port ${port}`);
+  console.log(`Server listening on port ${port}`);
 });
 
 let scanner = null;
@@ -105,7 +105,7 @@ let lastScanIo = "No scans started..";
 
 app.use("/scan", (req, res) => {
   const query = req.query;
-
+  let scanResponse = {finished : false}
   if (query.start) {
     if (scanner) {
       return res.send("Already scanning!");
@@ -113,33 +113,19 @@ app.use("/scan", (req, res) => {
 
     scanner = spawn("node", ["./scanner.js"]);
     lastScanIo = new Date() + " Started scanning...\n";
+
     scanner.stdout.on("data", (data) => {
       lastScanIo += data.toString();
     });
+
     scanner.stderr.on("data", (data) => {
       lastScanIo += data.toString();
     });
+
     scanner.on("close", (code) => {
       lastScanIo += "\nScan ended: " + new Date() + " with code: " + code;
       scanner = null;
+      res.send({finished: true});
     });
   }
-
-  db.each("SELECT COUNT(*) as numTracks FROM track", [], (err, row) => {
-    if (!err && row) {
-      res.send(
-        (
-          row.numTracks +
-          " tracks in db.\n" +
-          (!scanner
-            ? '<a href="/scan?start=true">Scan library</a>'
-            : '<a href="/scan">Refresh</a>') +
-          '\n<a href="/">Back to player</a>\n' +
-          lastScanIo
-        ).replace(/\n/g, "<br>")
-      );
-    } else {
-      res.send("Error:" + err.message);
-    }
-  });
 });
