@@ -1,26 +1,26 @@
-# dStream sirodoht fork
 
-## Differences from [DusteDdk/dstream](https://github.com/DusteDdk/dstream)
+<p align="center"><img width="100" src="favicon.svg" alt="Vue logo"></p>
 
-* docker free
-* systemd slaved
-* prettier
+<h2 align="center">dStream</h2>
+
+Stream your music from anywhere.
+![](dScreen.gif)
+This project was inspired by and based on the original work by DusteDdk that can be found at [DusteDdk/dstream](https://github.com/DusteDdk/dstream). This project has thus used the same name in its respect.
 
 ## Features
 
-* simple access to your music collection from the web browser
-* fast fuzzy search
-* for semi-organized music collections
-* sqlite database
-* single active process (node)
-* halfhearted hack
-* pure vanilla js with old-school innerHTML mangling
+* Simple access to your music collection from the web browser
+* Fast fuzzy search
+* Sqlite database
+* Single active process (node)
+* Vuejs and Vuetify front-end
+  
 
 ## Infrastructure
 
-* music collection available on the server
-* listens on port 3000
-* consider not exposing it to the internet without some authentication in front
+* Music collection available on the server
+* Listens on port 3000
+* Consider not exposing it to the internet without some authentication in front
 
 ## Setup
 
@@ -44,32 +44,18 @@ For loading environment variables for development
 
 ## Scanning music
 
-Add music files from the /music directory to the searchable database
+In order to add music to the database simply copy the files into the /music folder and press the scan button in the top right of the interface.
 
-1. go to /scan
-1. click "Scan" and wait.. press refresh if you're impatient,
-1. it's done with "Scan" appears again, go back, you're done.
-
-## Using
-
-1. press J or click text-box
-1. search
-1. press enter to play top result or add from results
+## Usage 
+Left click any track to play immediately
 
 ### Add track to queue
 
-1. press song-name / file name to add to queue
-1. click row left of it to autoplay from there if song is last in queue.
-1. click row right of it to remove currently playing song and play this instead.
+Right click any track to add to queue.
 
 ### Remove track from queue
 
-1. click on file name to remove a song from queue
-1. pressing the "insert" key removes the current song from queue
-
-### Help
-
-1. press the H key to show or hide the instructions
+Right click the track in the queue panel
 
 ## License
 

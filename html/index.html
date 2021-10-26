@@ -1,31 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
-<!-- <input type="button" onclick="toggle();" value="▶️" id="toggle">
-                <input type="button" onclick="setList(true, 0);" value="🔀">
-                🔍<input id="search" type="text" onkeyup="setList(false, 0);"><span id="numres"></span>
-                🔊<input type="range" min=0 max=100 value=100 id="vol"
-                    onchange="audio.volume=(document.getElementById('vol').value/100)" style="width: 100px;">
-                🕑<input type="range" min=0 max=100 value=100 id="tim" style="width: 400px;" step="0.01">
-                <div id="status" style="border: 1px solid black; margin-bottom: 0.5em; margin-top: 0.5em;"></div>
-                <div id="list"></div>
-                <div id="help" style="display:none;">
-                    <ul>
-                        <li>Click song name to play / add to queue</li>
-                        <li>Click file name to remove from queue</li>
-                        <li>? = 50 random tracks</li>
-                        <li>Enter (in search box) adds first entry to queue</li>
-                        <li>Insert (in search box) skips to next song in queue</li>
-                        <li>First word gives sort priority to artist. Last word gives sort priority to title</li>
-                        <li>H toggle this help text</li>
-                        <li>J jump to search box</li>
-                        <li><a href="/scan">/scan to control music scanning</a></li>
-                        <li>Arrow left/right Jump in track</li>
-                        <li>, / . Next/Prev page</li>
-                    </ul>
-                </div> -->
 
 <head>
     <title>dStream</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
+    <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+    <link rel="icon" type="image/png" href="/assets/favicon.png">
+    <link rel="manifest" href="/assets/site.webmanifest">
+    <link rel="mask-icon" href="/assets/safari-pinned-tab.svg" color="#5bbad5">
+    <meta name="msapplication-TileColor" content="#da532c">
+    <meta name="theme-color" content="#ffffff">
+
     <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/@mdi/font@6.x/css/materialdesignicons.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
@@ -64,6 +49,7 @@
             max-width: 100px;
         }
 
+
         .scroll::-webkit-scrollbar {
             width: 15px;
         }
@@ -86,6 +72,10 @@
         .no-scroll::-webkit-scrollbar {
             width: 0px;
         }
+
+        .v-slider__track-container {
+            height: 4px !important;
+        }
     </style>
 </head>
 
@@ -95,10 +85,11 @@
             <v-main>
                 <v-row class=" ma-0 pa-0">
 
-                    <v-card tile class="grey darken-4 top-row d-flex justify-center align center pl-4">
+                    <v-card tile class="grey darken-4 top-row d-flex justify-center align-center pl-4">
 
                         <v-col cols="2" class="d-flex justify-center align-center">
-                            <h2 class=" pl-4 d-flex justify-center align-center">dStream</h2>
+                            <v-img src="/assets/safari-pinned-tab.svg" max-width="35" max-height="35"></v-img>
+                            <h3>dStream</h3>
                         </v-col>
                         <v-col class="d-flex justify-space-around">
                             <v-container class="d-flex justify-center align-center">
@@ -106,7 +97,7 @@
                                     placeholder="Search tracks..." class=" mx-2 mx-md-4" color="green" rounded
                                     hide-details flat filled style="max-width: 450px;">
                                     <template #prepend-inner>
-                                        <v-icon :color="!isFocused ? 'grey' : undefined" class="ml-1 mr-2">
+                                        <v-icon class="ml-1 mr-2">
                                             mdi-magnify
                                         </v-icon>
                                     </template>
@@ -129,46 +120,92 @@
                     </v-card>
 
                 </v-row>
-                <v-row class="no-scroll middle-row ma-0 pa-0"> 
+                <v-row class="no-scroll middle-row ma-0 pa-0">
                     <v-col outlined class="black ma-0 pa-0" md="2">
-                        <v-container  fluid class=" ma-0 pa-0">
-                            <v-card class="black" elevation="0" tile style="height: 80vh;">
+                        <v-container fluid class=" ma-0 pa-0">
+                            <v-card class="no-scroll black" elevation="0" tile
+                                style="max-height: 80vh; overflow-y: scroll;">
+
                                 <v-card-title>
                                     Now playing
                                 </v-card-title>
-                                <v-card class="black" tile elevation="0" >
-                                    <v-container class="pa-0 ma-0 pl-3 pt-2 pb-2 d-flex flex-column align-center justify-start">
-                                        <v-container class="green--text pa-0 ma-0" >{{currentTrack.title}}</v-container>
-                                        <v-container class="grey--text text-caption pa-0 ma-0">{{currentTrack.artistName}}</v-container>
-                                    </v-container>
-                                </v-card>
+                                <v-container>
+                                    <v-card v-if="this.currentTrack" class="d-flex align-center flex-row black" tile
+                                        elevation="0">
+                                        <v-col class="ma-0 pa-0" md="3" xl="2">
+                                            <v-container class="ma-0 pa-0 pl-4">
+                                                <v-img max-width="15" max-height="15" v-if="playing"
+                                                    src="assets/equaliser-animated-green.gif"></v-img>
+                                                <span class="green--text" v-else> 1 </span>
+                                            </v-container>
+                                        </v-col>
+                                        <v-col class="ma-0 pa-0" md="9" xl="10">
+                                            <v-container
+                                                class="pa-0 ma-0 pt-2 pb-2 d-flex flex-column align-center justify-start">
+                                                <v-container class="green--text pa-0 ma-0">{{currentTrack.title}}
+                                                </v-container>
+                                                <v-container class="grey--text text-caption pa-0 ma-0">
+                                                    {{currentTrack.artistName}}</v-container>
+                                            </v-container>
+                                        </v-col>
+                                    </v-card>
+                                    <span v-else class="pl-4 grey--text text-caption ">No track playing</span>
+                                </v-container>
+                                <v-divider></v-divider>
                                 <v-card-title>
                                     Next in queue
                                 </v-card-title>
-                                <v-card  class="black" tile elevation="0" v-for="track in queue" :key="track.id">
-                                        <v-container class="pa-0 ma-0 pl-3 pt-2 pb-2 d-flex flex-column align-center justify-start">
-                                            <v-container class="white--text pa-0 ma-0" >{{track.title}}</v-container>
-                                            <v-container class="grey--text text-caption pa-0 ma-0">{{track.artistName}}</v-container>
-                                        </v-container>
-                                </v-card>
+                                <v-container>
+
+                                    <span v-if="!this.queue.length" class="pl-4 grey--text text-caption ">No tracks in
+                                        queue</span>
+                                    <v-card v-else class="pa-0 ma-0 d-flex justify-center align-center flex-row black"
+                                        tile elevation="0" v-for="track in queue" :key="track.id">
+                                        <v-col class="ma-0 pa-0" md="3" xl="2">
+                                            <v-container class="ma-0 pa-0 pl-4">{{queue.indexOf(track) + 2}}
+                                            </v-container>
+                                        </v-col>
+                                        <v-col class="ma-0 pa-0" md="9" xl="10">
+                                            <v-container
+                                                class="pa-0 ma-0 pt-2 pb-2 d-flex flex-column align-center justify-start">
+                                                <v-container class="white--text pa-0 ma-0">{{track.title}}</v-container>
+                                                <v-container class="grey--text text-caption pa-0 ma-0">
+                                                    {{track.artistName}}</v-container>
+                                            </v-container>
+                                        </v-col>
+                                    </v-card>
+
+                                </v-container>
                             </v-card>
                         </v-container>
                     </v-col>
                     <v-col class="ma-0 pa-0" md="10">
 
-                    <v-container fluid class="scroll ma-0 pa-0" style="max-height: 80vh; overflow-y: scroll;">
-                        <v-data-table item-key="id" :dense="dense" :page="page" class="grey--text"
-                            :headers="tableHeaders" :items="list" :items-per-page="-1"
-                            @update:page="updatePage" @current-items="updateCurrentList" @page-count="updateTotalPages"
-                            @click:row="handleClick" @contextmenu:row="handleRightClick">
-                            <template  v-slot:item.title="{ item }">
-                                <v-container class="pa-0 ma-0 pt-2 pb-2 d-flex flex-column align-center justify-start">
-                                    <v-container :class="currentTrack.title == item.title ? 'green--text pa-0 ma-0' : 'white--text pa-0 ma-0'" >{{item.title}}</v-container>
-                                    <v-container class="grey--text text-caption pa-0 ma-0">{{item.artistName}}</v-container>
-                                </v-container>
-                              </template>
-                        </v-data-table>
-                    </v-container>
+                        <v-container fluid class="scroll ma-0 pa-0" style="max-height: 80vh; overflow-y: scroll;">
+                            <v-data-table item-key="id" :dense="dense" :page="page" class="grey--text"
+                                :headers="tableHeaders" :items="list" :items-per-page="-1" @update:page="updatePage"
+                                @current-items="updateCurrentList" @page-count="updateTotalPages"
+                                @click:row="handleClick" @contextmenu:row="handleRightClick">
+                                <template v-slot:item.title="{ item }">
+                                    <v-container
+                                        class="pa-0 ma-0 pt-2 pb-2 d-flex flex-column align-center justify-start">
+                                        <v-container
+                                            :class="currentTrack.title == item.title ? 'green--text pa-0 ma-0' : 'white--text pa-0 ma-0'">
+                                            {{item.title}}</v-container>
+                                        <v-container class="grey--text text-caption pa-0 ma-0">{{item.artistName}}
+                                        </v-container>
+                                    </v-container>
+                                </template>
+
+                                <template v-slot:item.id="{ item }">
+                                    <v-img max-width="15" max-height="15" v-if="currentTrack == item && playing"
+                                        src="assets/equaliser-animated-green.gif"></v-img>
+                                    <span :class="currentTrack == item ? 'green--text' : ''"
+                                        v-else>{{currentList.indexOf(item) + 1}}</span>
+                                </template>
+
+                            </v-data-table>
+                        </v-container>
                     </v-col>
 
                 </v-row>
@@ -273,6 +310,7 @@
                 theme: { dark: true }
             }),
             data: {
+                tracksInQueue: 0,
                 repeat: false,
                 repeatSong: false,
                 userInput: null,
@@ -299,7 +337,7 @@
                 ],
                 isFocused: false,
                 playing: false,
-                currentTrack: '',
+                currentTrack: false,
                 audio: new Audio(),
                 shuffle: false,
                 history: [],
@@ -308,10 +346,13 @@
             },
 
             methods: {
-                handleRightClick(event, item){
+                handleRightClick(event, item) {
+                    let track = item.item
                     event.preventDefault();
-                    if(this.queue.indexOf(item.item) == -1){
-                        this.queue.push(item.item)
+                    if (this.queue.indexOf(track) == -1 && track != this.currentTrack) {
+                        console.log(this.queue, track)
+                        this.tracksInQueue++
+                        this.queue.push(track)
                     }
                 },
                 toggleRepeat() {
@@ -348,6 +389,11 @@
 
                 refreshList: async function () {
                     this.list = await this.setList(this.search, this.random, this.offset)
+                    if (this.list.length && !this.playing) {
+                        this.play(this.list[0])
+                        this.audio.pause()
+                        this.playing = false
+                    }
                 },
 
                 toggleShuffle() {
@@ -478,6 +524,13 @@
                         return
                     }
 
+                    if (this.queue.length != 0) {
+                        this.play(this.queue[0])
+                        this.queue.shift()
+                        this.tracksInQueue--
+                        return
+                    }
+
                     if (this.currentTrack != this.history[0]) {
                         this.history.unshift({
                             track: this.currentTrack,
@@ -519,39 +572,37 @@
                     }
                 },
                 playPrevious() {
-                    let currentIndex = this.currentTrack ? this.currentList.indexOf(this.currentTrack) : 0
+                    if (this.currentList.length) {
+
+                        let currentIndex = this.currentTrack ? this.currentList.indexOf(this.currentTrack) : 0
 
 
-                    if (this.shuffle) {
-                        if (this.history.length) {
-                            this.page = this.history[0].page
-                            this.play(this.history[0].track)
-                            this.history.shift()
-                        }
-                    }
-                    else {
-                        if (currentIndex == 0) {
-                            if (this.page != 1) {
-                                this.page--
-
-                                let s = this
-                                setTimeout(function () {
-
-                                    s.play(s.currentList[s.currentList.length - 1])
-                                }, 1);
+                        if (this.shuffle) {
+                            if (this.history.length) {
+                                this.page = this.history[0].page
+                                this.play(this.history[0].track)
+                                this.history.shift()
                             }
                         }
                         else {
-                            this.play(this.currentList[currentIndex - 1])
+                            if (currentIndex == 0) {
+                                if (this.page != 1) {
+                                    this.page--
+
+                                    let s = this
+                                    setTimeout(function () {
+
+                                        s.play(s.currentList[s.currentList.length - 1])
+                                    }, 1);
+                                }
+                            }
+                            else {
+                                console.log(this.currentList, this.currentList[currentIndex - 1])
+                                if(currentIndex >= 0 ){
+                                    this.play(this.currentList[currentIndex - 1])
+                                }
+                            }
                         }
-                    }
-                },
-                add(file) {
-                    cpl = -1;
-                    queue.push(file);
-                    setQueue();
-                    if (queue.length === 1) {
-                        play(file);
                     }
                 },
                 play(track) {
@@ -565,7 +616,7 @@
                     }
                 },
                 updateTime() {
-                    if(!this.userTimeInputInProgress){
+                    if (!this.userTimeInputInProgress) {
                         this.time = this.audio.currentTime
                     }
                 },
@@ -603,7 +654,7 @@
                     },
                     set: function (newValue) {
                         if (this.userTimeInputInProgress && newValue != 0 && newValue != 1000) {
-                            this.time = this.currentTrack.durationRaw * newValue/1000
+                            this.time = this.currentTrack.durationRaw * newValue / 1000
                             this.userInput = newValue
                         }
                     }
