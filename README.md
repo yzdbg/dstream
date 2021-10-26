@@ -9,6 +9,8 @@ This project was inspired by and based on the original work by DusteDdk that can
 
 ## Features
 
+* User friendly interface
+* Improved UX
 * Simple access to your music collection from the web browser
 * Fast fuzzy search
 * Sqlite database
