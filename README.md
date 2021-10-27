@@ -1,11 +1,10 @@
 
 <p align="center"><img width="100" src="favicon.svg" alt="Vue logo"></p>
-
 <h1 align="center">dStream</h1>
 
 Stream your music from anywhere.
 ![](dScreen.gif)
-This project was inspired by and based on the original work by DusteDdk that can be found at [DusteDdk/dstream](https://github.com/DusteDdk/dstream). This project has thus used the same name in its respect.
+This project was inspired by and based on the original work by [DusteDdk/dstream](https://github.com/DusteDdk/dstream) and a subsequen fork by [sirodoht/dstream](https://github.com/sirodoht/dstream). This project has thus used the same name in its respect.
 
 ## Features
 
