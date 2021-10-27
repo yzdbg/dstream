@@ -1,7 +1,7 @@
 
 <p align="center"><img width="100" src="favicon.svg" alt="Vue logo"></p>
 
-<h2 align="center">dStream</h2>
+<h1 align="center">dStream</h1>
 
 Stream your music from anywhere.
 ![](dScreen.gif)
