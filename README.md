@@ -4,7 +4,7 @@
 
 Stream your music from anywhere.
 ![](dScreen.gif)
-This project was inspired by and based on the original work by [DusteDdk/dstream](https://github.com/DusteDdk/dstream) and a subsequen fork by [sirodoht/dstream](https://github.com/sirodoht/dstream). This project has thus used the same name in its respect.
+This project was inspired by and based on the original work by [DusteDdk/dstream](https://github.com/DusteDdk/dstream) and a subsequen fork by [sirodoht/dstream](https://github.com/sirodoht/dstream). This project has thus kept the same name in its respect.
 
 ## Features
 
@@ -26,13 +26,14 @@ This project was inspired by and based on the original work by [DusteDdk/dstream
 ## Setup
 
 ```sh
-npm install
+npm install 
 mkdir db  # this is for the music metadata
-mkdir music  # this is for the music files / collection
-npm start
+mkdir music  # this is for the music files / add your music here
+
+npm start # to run
 ```
 
-## systemd
+## Systemd
 
 ```sh
 cp dstream.service /etc/systemd/system/
@@ -48,15 +49,11 @@ For loading environment variables for development
 In order to add music to the database simply copy the files into the /music folder and press the scan button in the top right of the interface.
 
 ## Usage 
-Left click any track to play immediately
-
-### Add track to queue
+Left click any track to play immediately.
 
 Right click any track to add to queue.
 
-### Remove track from queue
-
-Right click the track in the queue panel
+Right click the track in the queue panel.
 
 ## License
 

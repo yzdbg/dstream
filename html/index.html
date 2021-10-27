@@ -160,7 +160,7 @@
                                     <span v-if="!this.queue.length" class="pl-4 grey--text text-caption ">No tracks in
                                         queue</span>
                                     <v-card v-else class="pa-0 ma-0 d-flex justify-center align-center flex-row black"
-                                        tile elevation="0" v-for="track in queue" :key="track.id">
+                                        tile elevation="0" v-for="track in queue" :key="track.id" @contextmenu="removeTrackFromQueue(track,$event)">
                                         <v-col class="ma-0 pa-0" md="3" xl="2">
                                             <v-container class="ma-0 pa-0 pl-4">{{queue.indexOf(track) + 2}}
                                             </v-container>
@@ -346,11 +346,15 @@
             },
 
             methods: {
+                removeTrackFromQueue(track, event){
+                    event.preventDefault();
+                    let index = this.queue.indexOf(track)
+                    this.queue.splice(index,1)
+                },
                 handleRightClick(event, item) {
                     let track = item.item
                     event.preventDefault();
                     if (this.queue.indexOf(track) == -1 && track != this.currentTrack) {
-                        console.log(this.queue, track)
                         this.tracksInQueue++
                         this.queue.push(track)
                     }
@@ -597,7 +601,6 @@
                                 }
                             }
                             else {
-                                console.log(this.currentList, this.currentList[currentIndex - 1])
                                 if(currentIndex >= 0 ){
                                     this.play(this.currentList[currentIndex - 1])
                                 }
