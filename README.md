@@ -1,8 +1,9 @@
 
 <p align="center"><img width="100" src="favicon.svg" alt="Vue logo"></p>
 <h1 align="center">dStream</h1>
+<h3 align="center">Stream your music from anywhere.</h3>
 
-Stream your music from anywhere.
+
 ![](dScreen.gif)
 This project was inspired by and based on the original work by [DusteDdk/dstream](https://github.com/DusteDdk/dstream) and a subsequen fork by [sirodoht/dstream](https://github.com/sirodoht/dstream). This project has thus kept the same name in its respect.
 
@@ -13,6 +14,7 @@ This project was inspired by and based on the original work by [DusteDdk/dstream
 * Simple access to your music collection from the web browser
 * Fast fuzzy search
 * Sqlite database
+* Vue and vuetify frontend
 * Single active process (node)
 * Vuejs and Vuetify front-end
   
